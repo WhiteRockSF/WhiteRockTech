@@ -1,0 +1,21 @@
+<template>
+    <lightning-tabset variant="vertical">
+        <lightning-tab label="Overview">
+              <lightning-datatable
+                key-field="id"
+                data={events}
+                columns={columns}
+                hide-checkbox-column="true"	>
+        </lightning-datatable>
+        </lightning-tab>
+        <lightning-tab label="Events">
+         
+        </lightning-tab>
+        <lightning-tab label="Pages and Screens">
+      
+        </lightning-tab>
+          <lightning-tab label="Landing Page">
+      
+        </lightning-tab>
+    </lightning-tabset>
+</template>

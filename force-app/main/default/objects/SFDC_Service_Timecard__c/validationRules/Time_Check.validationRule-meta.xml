@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Time_Check</fullName>
+    <active>false</active>
+    <errorConditionFormula>OR( Start_Time__c &gt; End_Time__c ,
+  Ticket_Time__c &gt;= 12)</errorConditionFormula>
+    <errorMessage>Start Time can not be after end time and Hours worked can not be greater than 12 for one ticket.</errorMessage>
+</ValidationRule>

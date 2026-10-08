@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>Email_3_Next</fullName>
+        <description>Email 3 Next</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Email</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/X3rd_campaign_email</template>
+    </alerts>
+    <alerts>
+        <fullName>LI_Form_Fill_Out_Alert</fullName>
+        <description>LI_Form_Fill_Out_Alert</description>
+        <protected>false</protected>
+        <recipients>
+            <recipient>hannah@whiterocktech.net</recipient>
+            <type>user</type>
+        </recipients>
+        <recipients>
+            <recipient>michael@whiterocktech.net</recipient>
+            <type>user</type>
+        </recipients>
+        <recipients>
+            <recipient>susan@whiterocktech.net</recipient>
+            <type>user</type>
+        </recipients>
+        <senderAddress>salesforce@whiterocktech.net</senderAddress>
+        <senderType>OrgWideEmailAddress</senderType>
+        <template>unfiled$public/Susan_Email_Notification_for_Linkedin_Leads</template>
+    </alerts>
+    <alerts>
+        <fullName>Send_Email_1</fullName>
+        <description>Send Email 1</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Email</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/X1st_campaign_email</template>
+    </alerts>
+    <alerts>
+        <fullName>Send_Email_2</fullName>
+        <description>Send Email 2</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Email</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/X2nd_campaign_email</template>
+    </alerts>
+    <alerts>
+        <fullName>Send_Email_3</fullName>
+        <description>Send Email 3</description>
+        <protected>false</protected>
+        <recipients>
+            <field>Email</field>
+            <type>email</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/X3rd_campaign_email</template>
+    </alerts>
+    <fieldUpdates>
+        <fullName>Set_Opt_Out_to_TRUE</fullName>
+        <description>Set the Email Opt Out to TRUE for Mass emails that bounce back to leads in mass emails when campaigning</description>
+        <field>HasOptedOutOfEmail</field>
+        <literalValue>1</literalValue>
+        <name>Set Opt Out to TRUE</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Update_Email_Opt_Out</fullName>
+        <description>When the criteria for Bounced Email is met then update the Email Opt out field to TRUE.</description>
+        <field>HasOptedOutOfEmail</field>
+        <literalValue>1</literalValue>
+        <name>Update Email Opt Out</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Update_Lead_Status_to_unqualified</fullName>
+        <description>Update Lead status to unqualified when email opt out equals TRUE.</description>
+        <field>Status</field>
+        <literalValue>Not Qualified</literalValue>
+        <name>Update Lead Status to unqualified</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <rules>
+        <fullName>At Convert</fullName>
+        <active>false</active>
+        <criteriaItems>
+            <field>Lead.IsConverted</field>
+            <operation>equals</operation>
+            <value>True</value>
+        </criteriaItems>
+        <triggerType>onCreateOnly</triggerType>
+    </rules>
+    <rules>
+        <fullName>Email Lead Campaign</fullName>
+        <actions>
+            <name>Send_Email_1</name>
+            <type>Alert</type>
+        </actions>
+        <actions>
+            <name>Workflow_email_started</name>
+            <type>Task</type>
+        </actions>
+        <active>false</active>
+        <criteriaItems>
+            <field>Lead.CreatedDate</field>
+            <operation>notEqual</operation>
+        </criteriaItems>
+        <description>When a Lead is created, then send Email 1 on the day the Lead is created.</description>
+        <triggerType>onCreateOnly</triggerType>
+        <workflowTimeTriggers>
+            <actions>
+                <name>Send_Email_2</name>
+                <type>Alert</type>
+            </actions>
+            <offsetFromField>Lead.CreatedDate</offsetFromField>
+            <timeLength>7</timeLength>
+            <workflowTimeTriggerUnit>Days</workflowTimeTriggerUnit>
+        </workflowTimeTriggers>
+        <workflowTimeTriggers>
+            <actions>
+                <name>Send_Email_3</name>
+                <type>Alert</type>
+            </actions>
+            <offsetFromField>Lead.CreatedDate</offsetFromField>
+            <timeLength>14</timeLength>
+            <workflowTimeTriggerUnit>Days</workflowTimeTriggerUnit>
+        </workflowTimeTriggers>
+    </rules>
+    <rules>
+        <fullName>Lead Notification</fullName>
+        <actions>
+            <name>New_Lead_Has_Come_In</name>
+            <type>Task</type>
+        </actions>
+        <active>false</active>
+        <criteriaItems>
+            <field>Lead.CreatedById</field>
+            <operation>contains</operation>
+            <value>McGibbony</value>
+        </criteriaItems>
+        <description>When a lead record is created, then notify Mike.</description>
+        <triggerType>onCreateOnly</triggerType>
+    </rules>
+    <rules>
+        <fullName>Remove Bounced Emails</fullName>
+        <actions>
+            <name>Update_Email_Opt_Out</name>
+            <type>FieldUpdate</type>
+        </actions>
+        <active>false</active>
+        <description>When running mass emails, if the email bounces back, then auto set Email Opt Out to be TRUE.</description>
+        <formula>IF( EmailBouncedDate  &lt;&gt; NULL,  HasOptedOutOfEmail = TRUE,  HasOptedOutOfEmail = FALSE)</formula>
+        <triggerType>onCreateOrTriggeringUpdate</triggerType>
+    </rules>
+    <rules>
+        <fullName>Update Lead Status when email opt out</fullName>
+        <actions>
+            <name>Update_Lead_Status_to_unqualified</name>
+            <type>FieldUpdate</type>
+        </actions>
+        <active>false</active>
+        <criteriaItems>
+            <field>Lead.HasOptedOutOfEmail</field>
+            <operation>equals</operation>
+            <value>True</value>
+        </criteriaItems>
+        <description>When a Lead is set to Email Opt Out, then update Lead Status to UnQualified.</description>
+        <triggerType>onAllChanges</triggerType>
+    </rules>
+    <tasks>
+        <fullName>New_Lead_Has_Come_In</fullName>
+        <assignedTo>michael@whiterocktech.net</assignedTo>
+        <assignedToType>user</assignedToType>
+        <description>Check the lead view for new lead.  You got one in today.</description>
+        <dueDateOffset>1</dueDateOffset>
+        <notifyAssignee>false</notifyAssignee>
+        <offsetFromField>Lead.CreatedDate</offsetFromField>
+        <priority>High</priority>
+        <protected>false</protected>
+        <status>Not Started</status>
+        <subject>New Lead Has Come In</subject>
+    </tasks>
+    <tasks>
+        <fullName>Workflow_email_started</fullName>
+        <assignedTo>michael@whiterocktech.net</assignedTo>
+        <assignedToType>user</assignedToType>
+        <description>Workflow started.  Had to add this to show that the campaign is started and moving forward.</description>
+        <dueDateOffset>1</dueDateOffset>
+        <notifyAssignee>false</notifyAssignee>
+        <offsetFromField>Lead.CreatedDate</offsetFromField>
+        <priority>Normal</priority>
+        <protected>false</protected>
+        <status>Completed</status>
+        <subject>Workflow email started</subject>
+    </tasks>
+</Workflow>

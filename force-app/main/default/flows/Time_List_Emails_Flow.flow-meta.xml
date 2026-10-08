@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>58.0</apiVersion>
+    <assignments>
+        <name>Email_A_Updates</name>
+        <label>Email A Updates</label>
+        <locationX>264</locationX>
+        <locationY>576</locationY>
+        <assignmentItems>
+            <assignToReference>What_Email.Last_Email_Received__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>A- Demo w/ Bezos</stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>What_Email</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Email_B_Updates</name>
+        <label>Email B Updates</label>
+        <locationX>528</locationX>
+        <locationY>576</locationY>
+        <assignmentItems>
+            <assignToReference>What_Email.Last_Email_Received__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>B- Follow Up 1</stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>What_Email</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Email_C_Updates</name>
+        <label>Email C Updates</label>
+        <locationX>792</locationX>
+        <locationY>576</locationY>
+        <assignmentItems>
+            <assignToReference>What_Email.Last_Email_Received__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>C- Follow Up 2</stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>What_Email</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Email_D_Updates</name>
+        <label>Email D Updates</label>
+        <locationX>1056</locationX>
+        <locationY>576</locationY>
+        <assignmentItems>
+            <assignToReference>What_Email.Last_Email_Received__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>D- Follow Up 3</stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>What_Email</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Email_E_Updates</name>
+        <label>Email E Updates</label>
+        <locationX>1320</locationX>
+        <locationY>576</locationY>
+        <assignmentItems>
+            <assignToReference>What_Email.Last_Email_Received__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <stringValue>E- Follow Up 4</stringValue>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>What_Email</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <name>Copy_1_of_Which_Email</name>
+        <label>Which Email</label>
+        <locationX>924</locationX>
+        <locationY>468</locationY>
+        <defaultConnector>
+            <targetReference>What_Email</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Copy_1_of_Email_A</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Subject</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>Demo Call w/ Jeff Bezos</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Email_A_Updates</targetReference>
+            </connector>
+            <label>Email A</label>
+        </rules>
+        <rules>
+            <name>Copy_1_of_Email_B</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Subject</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>Research -</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Email_B_Updates</targetReference>
+            </connector>
+            <label>Email B</label>
+        </rules>
+        <rules>
+            <name>Copy_1_of_Email_C</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Subject</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>Don&apos;t Let These 7 Deadly Sins Steal Your CRM ROI</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Email_C_Updates</targetReference>
+            </connector>
+            <label>Email C</label>
+        </rules>
+        <rules>
+            <name>Copy_1_of_Email_D</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Subject</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>Chat with</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>What_Email.Last_Email_Received__c</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue>D- Follow Up 3</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Email_D_Updates</targetReference>
+            </connector>
+            <label>Email D</label>
+        </rules>
+        <rules>
+            <name>Copy_1_of_Email_E</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Subject</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>Chat with</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Email_E_Updates</targetReference>
+            </connector>
+            <label>Email E</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>Today</name>
+        <dataType>Date</dataType>
+        <expression>TODAY()</expression>
+    </formulas>
+    <interviewLabel>Time List Emails Flow {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Time List Emails Flow</label>
+    <loops>
+        <name>What_Email</name>
+        <label>What Email</label>
+        <locationX>176</locationX>
+        <locationY>360</locationY>
+        <collectionReference>test</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Copy_1_of_Which_Email</targetReference>
+        </nextValueConnector>
+    </loops>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>test</name>
+        <label>Get Lead IDs</label>
+        <locationX>176</locationX>
+        <locationY>252</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>What_Email</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.WhoId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>Lead</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>test</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Subject</field>
+            <operator>Contains</operator>
+            <value>
+                <stringValue>List Email</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>Create_Date_is_Today__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>Task</object>
+        <schedule>
+            <frequency>Daily</frequency>
+            <startDate>2023-09-25</startDate>
+            <startTime>16:15:00.000Z</startTime>
+        </schedule>
+        <triggerType>Scheduled</triggerType>
+    </start>
+    <status>Obsolete</status>
+    <variables>
+        <name>Date</name>
+        <dataType>Date</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <elementReference>Today</elementReference>
+        </value>
+    </variables>
+</Flow>

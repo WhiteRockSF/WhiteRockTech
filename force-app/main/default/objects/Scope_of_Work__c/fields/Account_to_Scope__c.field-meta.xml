@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Account_to_Scope__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <inlineHelpText>Select the Account to build the scope for.  Note that you must first create the account before creating the scope.</inlineHelpText>
+    <label>Account to Scope</label>
+    <referenceTo>Account</referenceTo>
+    <relationshipLabel>Scopes of Work</relationshipLabel>
+    <relationshipName>Scopes_of_Work</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

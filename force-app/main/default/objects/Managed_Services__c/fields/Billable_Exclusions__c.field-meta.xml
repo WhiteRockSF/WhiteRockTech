@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Billable_Exclusions__c</fullName>
+    <label>Billable Exclusions</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>SFDC Databases</fullName>
+                <default>false</default>
+                <label>SFDC Databases</label>
+            </value>
+            <value>
+                <fullName>MACDs</fullName>
+                <default>false</default>
+                <label>MACDs</label>
+            </value>
+            <value>
+                <fullName>3rd Party Support/Integration</fullName>
+                <default>false</default>
+                <label>3rd Party Support/Integration</label>
+            </value>
+            <value>
+                <fullName>Website Development</fullName>
+                <default>false</default>
+                <label>Website Development</label>
+            </value>
+            <value>
+                <fullName>Newly Created Lightning Components</fullName>
+                <default>false</default>
+                <label>Newly Created Lightning Components</label>
+            </value>
+            <value>
+                <fullName>Reports &amp; Dashboards</fullName>
+                <default>false</default>
+                <label>Reports &amp; Dashboards</label>
+            </value>
+            <value>
+                <fullName>APEX Development</fullName>
+                <default>false</default>
+                <label>APEX Development</label>
+            </value>
+            <value>
+                <fullName>VisualForce Development</fullName>
+                <default>false</default>
+                <label>VisualForce Development</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>3</visibleLines>
+</CustomField>

@@ -1,0 +1,54 @@
+<apex:page standardController="TASKRAY__Project_Task__c" extensions="MonthlySupportDocGenerationController" cache="true">
+    <html xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:w="urn:schemas-microsoft-com:office:word">
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+            <style>
+                @page { size: 8.5in 11in; margin: 1in }
+                @pageSection {
+                    size:8.5in 11.0in;
+                    margin:1.0in 1.25in 1.0in 1.25in;
+                }
+            </style>
+        </head>
+        <body style="margin: 1in; font-size: 11pt; color: #111111;">
+            <div style="mso-element: header;">
+                <p style="font-size: 26pt; text-align: center;">
+                    {!companyName} Health Check
+                </p>
+            </div>
+            <p>
+                <span>Hi Team,</span><br/>
+                <br/>
+                <span>I've completed your <b>{!monthValue} Salesforce Health Check</b>. Below is a quick summary of key findings and recommended next steps.</span>
+                <br/>
+                </p>
+            <hr/>
+            <div style="margin-top: 20px; margin-bottom: 10px; font-size: 9pt; color: #3C3D3E;">
+                <apex:repeat value="{!checklists}" var="checklist">
+                    <p>
+                        <div> 
+                            <b>{!checklist.Name}</b>
+                        </div>
+
+                        <apex:repeat value="{!checklist.TASKRAY__TaskRay_Checklist_Items__r}" var="item">
+                            <span>
+                                &bull;&nbsp;&nbsp; <apex:outputText value="{!item.TASKRAY__trLongName__c}" />
+                            </span>
+                            <br/>
+                        </apex:repeat>
+                    </p>
+                </apex:repeat>
+            </div>
+            <hr/>
+            <br/>
+            <p>
+                <span>Let me know if you'd like to review any of these together. We can prioritize based on what matters most to your team.</span>
+                <br/>
+                <span>Thanks,</span>
+                <br/>
+                <span>[Your Name]</span>
+            </p>
+        </body>
+    </html>
+</apex:page>

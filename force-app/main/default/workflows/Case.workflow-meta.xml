@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>Send_Logan_Notification_when_Case_is_assigned</fullName>
+        <description>Send Logan Notification when Case is assigned</description>
+        <protected>false</protected>
+        <recipients>
+            <recipient>lwalsh@whiterocktech.net</recipient>
+            <type>user</type>
+        </recipients>
+        <recipients>
+            <recipient>ramon@whiterocktech.net</recipient>
+            <type>user</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/SUPPORTNewassignmentnotification</template>
+    </alerts>
+    <fieldUpdates>
+        <fullName>CLose</fullName>
+        <field>Status</field>
+        <literalValue>Closed</literalValue>
+        <name>CLose</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Trello_Backlog</fullName>
+        <field>Status</field>
+        <literalValue>Trello Backlog</literalValue>
+        <name>Trello Backlog</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>Literal</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <fieldUpdates>
+        <fullName>Update_Case_Owner</fullName>
+        <description>If Case is not already owned by Logan then assign to Logan.</description>
+        <field>OwnerId</field>
+        <lookupValue>ramon@whiterocktech.net</lookupValue>
+        <lookupValueType>User</lookupValueType>
+        <name>Update Case Owner</name>
+        <notifyAssignee>false</notifyAssignee>
+        <operation>LookupValue</operation>
+        <protected>false</protected>
+        <reevaluateOnChange>false</reevaluateOnChange>
+    </fieldUpdates>
+    <rules>
+        <fullName>Assign Case to Logan</fullName>
+        <actions>
+            <name>Send_Logan_Notification_when_Case_is_assigned</name>
+            <type>Alert</type>
+        </actions>
+        <actions>
+            <name>Update_Case_Owner</name>
+            <type>FieldUpdate</type>
+        </actions>
+        <active>true</active>
+        <booleanFilter>1 OR 2</booleanFilter>
+        <criteriaItems>
+            <field>Case.CreatedById</field>
+            <operation>contains</operation>
+            <value>Portal</value>
+        </criteriaItems>
+        <criteriaItems>
+            <field>Case.Origin</field>
+            <operation>equals</operation>
+            <value>Web</value>
+        </criteriaItems>
+        <description>When I make the owner of the case logan or we get a case from the website, then send him a notification via email to let him know and set case owner to Logan if not already done so.</description>
+        <triggerType>onCreateOrTriggeringUpdate</triggerType>
+    </rules>
+    <rules>
+        <fullName>Assign Case to Manohar</fullName>
+        <active>false</active>
+        <criteriaItems>
+            <field>Case.OwnerId</field>
+            <operation>contains</operation>
+            <value>Manohar</value>
+        </criteriaItems>
+        <description>When I make the owner of the case Manohar, then send him a notification via email to let him know when I say notify him.</description>
+        <triggerType>onCreateOrTriggeringUpdate</triggerType>
+    </rules>
+</Workflow>

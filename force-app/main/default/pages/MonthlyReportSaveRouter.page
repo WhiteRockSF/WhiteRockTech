@@ -1,0 +1,3 @@
+<apex:page standardController="TASKRAY__Project_Task__c" extensions="MonthlySupportDocGenerationController" action="{!saveToRecord}">
+    <p>Generating document, please wait...</p>
+</apex:page>

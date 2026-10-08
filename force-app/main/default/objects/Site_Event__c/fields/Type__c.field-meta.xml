@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Type__c</fullName>
+    <label>Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Page View</fullName>
+                <default>true</default>
+                <label>Page View</label>
+            </value>
+            <value>
+                <fullName>Scroll_50</fullName>
+                <default>false</default>
+                <label>Scroll_50</label>
+            </value>
+            <value>
+                <fullName>Scroll_75</fullName>
+                <default>false</default>
+                <label>Scroll_75</label>
+            </value>
+            <value>
+                <fullName>scroll_100</fullName>
+                <default>false</default>
+                <label>scroll_100</label>
+            </value>
+            <value>
+                <fullName>Scroll_25</fullName>
+                <default>false</default>
+                <label>Scroll_25</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

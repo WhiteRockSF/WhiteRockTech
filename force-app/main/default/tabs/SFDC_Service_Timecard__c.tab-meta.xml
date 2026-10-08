@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customObject>true</customObject>
+    <description>We are using this object from a package to track our time but we are not using any other function or flow from this package.  MPM update 11/4/2022</description>
+    <motif>Custom19: Wrench</motif>
+</CustomTab>

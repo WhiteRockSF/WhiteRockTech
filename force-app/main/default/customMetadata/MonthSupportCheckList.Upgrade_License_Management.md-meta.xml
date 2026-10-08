@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Upgrade / License Management</label>
+    <protected>false</protected>
+    <values>
+        <field>Check_List_Items__c</field>
+        <value xsi:type="xsd:string">Review latest Salesforce release notes (if within release cycle)
+Identify new features relevant to the client’s setup
+Assess potential impact to current configuration
+Review current license usage vs. allocation
+Identify unused or underutilized licenses
+Identify potential licensing risks or inefficiencies
+Identify recommended improvements or changes</value>
+    </values>
+</CustomMetadata>

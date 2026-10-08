@@ -1,0 +1,14 @@
+<apex:page applyHtmlTag="true" sidebar="false" showHeader="false" >
+
+  <html lang="en">
+
+  <body>
+    <script>
+      let queryParam = window.location.search;
+      queryParam = queryParam.replace('code', 'c__code');
+      window.location.href = `https://whiterocktech.my.site.com/portal/s/${queryParam}`;
+    </script>
+  </body>
+
+  </html>
+</apex:page>

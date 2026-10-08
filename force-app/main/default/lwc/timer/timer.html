@@ -1,0 +1,220 @@
+<template>
+    <template if:true={isSpinner}>
+        <div class="slds-spinner_container" style="position: fixed">
+            <lightning-spinner alternative-text="Loading" variant="brand" size="large">
+            </lightning-spinner>
+        </div>
+    </template>
+
+    <lightning-card title="Time Cards">
+        <lightning-button-icon icon-name="utility:add" slot="actions" onclick={add}></lightning-button-icon>
+        <lightning-button label={toggleSaveLabel} icon-name="utility:save" slot="actions" onclick={handleSave}>
+        </lightning-button>
+        <lightning-button label="Cancel" icon-name="utility:cancel" slot="actions" onclick={handleCancel}>
+        </lightning-button>
+        <br />
+
+        <div class="slds-grid slds-wrap">
+            <div class="slds-col slds-size_2-of-6">
+
+            </div>
+            <div class="slds-col slds-size_1-of-6">
+                <lightning-input type="date" name="startDate" label="Start Date" onchange={handleChange}
+                    value={startDate} variant="label-hidden" if:true={isShow}></lightning-input>
+
+            </div>
+            <div class="slds-col slds-size_1-of-6">
+                <lightning-input type="date" name="endDate" label="End Date" onchange={handleChange} value={endDate}
+                    variant="label-hidden" if:true={isShow}></lightning-input>
+
+            </div>
+            <div class="slds-col slds-size_1-of-6">
+
+            </div>
+            <div class="slds-col slds-size_1-of-6">
+                Total for Period&nbsp;<lightning-formatted-number value={totalOfPer} label={totalOfPer}
+                    target="_self"></lightning-formatted-number>
+            </div>
+        </div>
+
+
+
+
+        <div class="slds-p-around_x-small">
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr class="">
+                        <th class="slds-size_2-of-12" scope="col">
+                            <div class="slds-truncate" title="Production">Production</div>
+                        </th>
+                        <th class="slds-size_1-of-12" scope="col">
+                            <div class="slds-truncate" title="TaskRay Task">TaskRay Task</div>
+                        </th>
+                        <th class="slds-size_2-of-12" scope="col">
+                            <div class="slds-truncate" title="Service">Service</div>
+                        </th>
+                        <th class="slds-size_1-of-12" scope="col">
+                            <div class="slds-truncate" title="Date of Service">Date of Service</div>
+                        </th>
+                        <th class="slds-size_1-of-12" scope="col">
+                            <div class="slds-truncate" title="Start Time">Start Time</div>
+                        </th>
+                        <th class="slds-size_1-of-12" scope="col">
+                            <div class="slds-truncate" title="End Time">End Time</div>
+                        </th>
+                        <th class="slds-size_1-of-12" scope="col">
+                            <div class="slds-truncate" title="Ticket Time">Ticket Time</div>
+                        </th>
+                        <th class="slds-size_2-of-12" scope="col">
+                            <div class="slds-truncate" title="Service Notes">Service Notes</div>
+                        </th>
+                        <th class="slds-size_1-of-12" scope="col">
+                            <div class="slds-truncate" title="Action">Action</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={myList} for:item="item" for:index="indexVar">
+                        <tr key={item.key} class="slds-hint-parent" ondblclick={onDoubleClickEdit}>
+
+                            <!-- Production -->
+                            <td class="slds-size_2-of-12" data-label="Prospecting" data-prod={item.key}>
+                                <div title="Prospecting">
+                                    <template if:false={isEdited} if:true={item.Production__c}>
+                                        <lightning-formatted-url value={item.ProductionUrl} label={item.ProductionName}
+                                            target="_self"></lightning-formatted-url>
+                                    </template>
+                                    <template if:true={isEdited}>
+                                        <c-lookup-lwc unique-key={item.Id} value-id={item.Production__c}
+                                            obj-name="Production__c" icon-name="custom:custom85" label-name="Production"
+                                            data-key={item.key} data-id={item.Id} onvalueselect={handleSelection3}>
+                                        </c-lookup-lwc>
+                                    </template>
+                                </div>
+                            </td>
+
+                            <!-- Case -->
+                            <td class="slds-size_1-of-12" data-label="Prospecting" data-task={item.key}>
+                                <div title="Prospecting">
+                                    <template if:false={isEdited} if:true={item.TaskRay_Task__c}>
+                                        <lightning-formatted-url value={item.TaskUrl} label={item.TaskName}
+                                            target="_self"></lightning-formatted-url>
+                                    </template>
+                                    <template if:true={isEdited}>
+                                        <c-lookup-lwc unique-key={item.Id} value-id={item.TaskRay_Task__c}
+                                            obj-name="TASKRAY__Project_Task__c" icon-name="custom:custom105"
+                                            label-name="TaskRay Task" data-key={item.key} data-id={item.Id}
+                                            onvalueselect={handleSelection1}>
+                                        </c-lookup-lwc>
+                                    </template>
+                                </div>
+                            </td>
+
+                            <!-- Service -->
+                            <td class="slds-size_2-of-12" data-label="Prospecting" data-service={item.key}>
+                                <div title="Prospecting">
+                                    <template if:false={isEdited} if:true={item.Service__c}>
+                                        <lightning-formatted-url value={item.ServiceUrl} label={item.ServiceName}
+                                            target="_self"></lightning-formatted-url>
+                                    </template>
+                                    <template if:true={isEdited}>
+                                        <c-lookup-lwc unique-key={item.Id} value-id={item.Service__c}
+                                            data-key={item.key} data-id={item.Id} obj-name="Product2"
+                                            icon-name="custom:custom93" label-name="Service"
+                                            onvalueselect={handleSelection2}>
+                                        </c-lookup-lwc>
+                                    </template>
+                                </div>
+                            </td>
+
+                            <!-- Date_of_Service -->
+                            <td class="slds-size_1-of-12" data-label="Prospecting">
+                                <div title="Prospecting">
+                                    <template if:false={isEdited}>
+                                        <lightning-formatted-date-time value={item.Date_of_Service__c}
+                                            label={item.Date_of_Service__c}
+                                            target="_self"></lightning-formatted-date-time>
+                                    </template>
+                                    <template if:true={isEdited}>
+                                        <lightning-input key={item.key} data-id={item.Id} data-key={item.key}
+                                            name="Date_of_Service__c" label="Name" type="date"
+                                            value={item.Date_of_Service__c} variant="label-hidden"
+                                            onchange={handleNameChange} required="true"></lightning-input>
+                                    </template>
+                                </div>
+                            </td>
+
+                            <!-- Start_Time__c -->
+                            <td class="slds-size_1-of-12" data-label="Prospecting">
+                                <div title="Prospecting">
+                                    <template if:false={isEdited}>
+                                        <!-- <c-custom-formatted-time number={item.Start_Time__c}></c-custom-formatted-time> -->
+                                        <lightning-formatted-time value={item.Start_Time__c} label={item.Start_Time__c}
+                                            target="_self"></lightning-formatted-time>
+                                    </template>
+                                    <template if:true={isEdited}>
+                                        <lightning-input key={item.key} data-id={item.Id} data-key={item.key}
+                                            name="Start_Time__c" label="Name" type="time" value={item.Start_Time__c}
+                                            variant="label-hidden" onchange={handleNameChange}
+                                            required="true"></lightning-input>
+                                    </template>
+                                </div>
+                            </td>
+
+                            <!-- End_Time__c -->
+                            <td class="slds-size_1-of-12" data-label="Prospecting">
+                                <div title="Prospecting">
+                                    <template if:false={isEdited}>
+                                        <lightning-formatted-time value={item.End_Time__c} label={item.End_Time__c}
+                                            target="_self"></lightning-formatted-time>
+                                        <!-- <c-custom-formatted-time number={item.End_Time__c}></c-custom-formatted-time> -->
+                                    </template>
+                                    <template if:true={isEdited}>
+                                        <lightning-input key={item.key} data-id={item.Id} data-key={item.key}
+                                            name="End_Time__c" label="Name" type="time" value={item.End_Time__c}
+                                            variant="label-hidden" onchange={handleNameChange}
+                                            required="true"></lightning-input>
+                                    </template>
+                                </div>
+                            </td>
+                            <!-- Ticket_Time__c -->
+                            <td class="slds-size_2-of-12" data-label="Prospecting">
+                                <div title="Prospecting">
+                                    <lightning-formatted-number value={item.Ticket_Time__c} label={item.Ticket_Time__c}
+                                        target="_self"></lightning-formatted-number>
+                                </div>
+                            </td>
+
+
+                            <!-- Service_Notes__c -->
+                            <td class="slds-size_2-of-12" data-label="Prospecting">
+                                <div title="Prospecting">
+                                    <template if:false={isEdited}>
+                                        <lightning-formatted-rich-text value={item.Service_Notes__c}
+                                            label={item.Service_Notes__c}
+                                            target="_self"></lightning-formatted-rich-text>
+                                    </template>
+
+                                    <template if:true={isEdited}>
+                                        <lightning-textarea key={item.key} data-id={item.Id} data-key={item.key}
+                                            name="Service_Notes__c" label="Name" value={item.Service_Notes__c}
+                                            variant="label-hidden" onchange={handleNameChange}
+                                            required="true"></lightning-textarea>
+                                    </template>
+                                </div>
+                            </td>
+
+                            <td class="slds-size_1-of-12" data-label="Prospecting">
+
+                                <a name={indexVar} data-id={item.Id} onclick={remove}>
+                                    <lightning-icon icon-name="utility:delete" alternative-text="delete"
+                                        size="small"></lightning-icon>
+                                </a>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </lightning-card>
+</template>

@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Activity_Components__c</fullName>
+    <description>Sub-Category that ties the scope requirement&apos;s project phase to the deliverable section of the contract.</description>
+    <label>Activity Components</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <controllingField>Project_Phase__c</controllingField>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Kickoff project</fullName>
+                <default>false</default>
+                <label>Kickoff project</label>
+            </value>
+            <value>
+                <fullName>Develop project plan</fullName>
+                <default>false</default>
+                <label>Develop project plan</label>
+            </value>
+            <value>
+                <fullName>Develop test approach plan</fullName>
+                <default>false</default>
+                <label>Develop test approach plan</label>
+            </value>
+            <value>
+                <fullName>Develop training plan</fullName>
+                <default>false</default>
+                <label>Develop training plan</label>
+            </value>
+            <value>
+                <fullName>Conduct detailed requirements workshop</fullName>
+                <default>false</default>
+                <label>Conduct detailed requirements workshop</label>
+            </value>
+            <value>
+                <fullName>Complete requirements documentation</fullName>
+                <default>false</default>
+                <label>Complete requirements documentation</label>
+            </value>
+            <value>
+                <fullName>Approve requirements</fullName>
+                <default>false</default>
+                <label>Approve requirements</label>
+            </value>
+            <value>
+                <fullName>Develop test cases</fullName>
+                <default>false</default>
+                <label>Develop test cases</label>
+            </value>
+            <value>
+                <fullName>Start on functional design</fullName>
+                <default>false</default>
+                <label>Start on functional design</label>
+            </value>
+            <value>
+                <fullName>Executed declarative configuration</fullName>
+                <default>false</default>
+                <label>Executed declarative configuration</label>
+            </value>
+            <value>
+                <fullName>Solution configuration</fullName>
+                <default>false</default>
+                <label>Solution configuration</label>
+            </value>
+            <value>
+                <fullName>Develop functionality/Integration/Data Migration</fullName>
+                <default>false</default>
+                <label>Develop functionality/Integration/Data Migration</label>
+            </value>
+            <value>
+                <fullName>Conduct unit test cases</fullName>
+                <default>false</default>
+                <label>Conduct unit test cases</label>
+            </value>
+            <value>
+                <fullName>Finalize test cases</fullName>
+                <default>false</default>
+                <label>Finalize test cases</label>
+            </value>
+            <value>
+                <fullName>Execute system integration testing (Engineering Teams)</fullName>
+                <default>false</default>
+                <label>Execute system integration testing (Engineering Teams)</label>
+            </value>
+            <value>
+                <fullName>Execute user acceptance testing</fullName>
+                <default>false</default>
+                <label>Execute user acceptance testing</label>
+            </value>
+            <value>
+                <fullName>Approve user acceptance testing (NSL)</fullName>
+                <default>false</default>
+                <label>Approve user acceptance testing (NSL)</label>
+            </value>
+            <value>
+                <fullName>Training</fullName>
+                <default>false</default>
+                <label>Training</label>
+            </value>
+            <value>
+                <fullName>Go/No-Go (NSL)</fullName>
+                <default>false</default>
+                <label>Go/No-Go (NSL)</label>
+            </value>
+            <value>
+                <fullName>Accept solution (NSL)</fullName>
+                <default>false</default>
+                <label>Accept solution (NSL)</label>
+            </value>
+            <value>
+                <fullName>Post launch support</fullName>
+                <default>false</default>
+                <label>Post launch support</label>
+            </value>
+        </valueSetDefinition>
+        <valueSettings>
+            <controllingFieldValue>Discovery</controllingFieldValue>
+            <valueName>Kickoff project</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Discovery</controllingFieldValue>
+            <valueName>Develop project plan</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Discovery</controllingFieldValue>
+            <valueName>Develop test approach plan</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Discovery</controllingFieldValue>
+            <valueName>Develop training plan</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Discovery</controllingFieldValue>
+            <valueName>Conduct detailed requirements workshop</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Discovery</controllingFieldValue>
+            <valueName>Complete requirements documentation</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Discovery</controllingFieldValue>
+            <valueName>Approve requirements</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Design</controllingFieldValue>
+            <controllingFieldValue>Hardening</controllingFieldValue>
+            <valueName>Develop test cases</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Design</controllingFieldValue>
+            <valueName>Start on functional design</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Design</controllingFieldValue>
+            <valueName>Executed declarative configuration</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Development</controllingFieldValue>
+            <valueName>Solution configuration</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Development</controllingFieldValue>
+            <controllingFieldValue>Hardening</controllingFieldValue>
+            <valueName>Develop functionality/Integration/Data Migration</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Development</controllingFieldValue>
+            <controllingFieldValue>Hardening</controllingFieldValue>
+            <valueName>Conduct unit test cases</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Development</controllingFieldValue>
+            <controllingFieldValue>Hardening</controllingFieldValue>
+            <valueName>Finalize test cases</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>UAT1</controllingFieldValue>
+            <controllingFieldValue>UAT2</controllingFieldValue>
+            <controllingFieldValue>UAT3</controllingFieldValue>
+            <controllingFieldValue>Hardening</controllingFieldValue>
+            <valueName>Execute system integration testing (Engineering Teams)</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>UAT1</controllingFieldValue>
+            <controllingFieldValue>UAT2</controllingFieldValue>
+            <controllingFieldValue>UAT3</controllingFieldValue>
+            <controllingFieldValue>Hardening</controllingFieldValue>
+            <valueName>Execute user acceptance testing</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>UAT1</controllingFieldValue>
+            <controllingFieldValue>UAT2</controllingFieldValue>
+            <controllingFieldValue>UAT3</controllingFieldValue>
+            <controllingFieldValue>Hardening</controllingFieldValue>
+            <valueName>Approve user acceptance testing (NSL)</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Go Live</controllingFieldValue>
+            <controllingFieldValue>Support</controllingFieldValue>
+            <valueName>Training</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Go Live</controllingFieldValue>
+            <valueName>Go/No-Go (NSL)</valueName>
+        </valueSettings>
+        <valueSettings>
+            <controllingFieldValue>Go Live</controllingFieldValue>
+            <controllingFieldValue>Support</controllingFieldValue>
+            <valueName>Accept solution (NSL)</valueName>
+        </valueSettings>
+    </valueSet>
+</CustomField>

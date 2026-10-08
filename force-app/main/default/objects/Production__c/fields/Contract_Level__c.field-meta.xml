@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Contract_Level__c</fullName>
+    <label>Contract Level</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Customer Account Planning Module</fullName>
+                <default>false</default>
+                <label>Customer Account Planning Module</label>
+            </value>
+            <value>
+                <fullName>Customer Account Scorecard</fullName>
+                <default>false</default>
+                <label>Customer Account Scorecard</label>
+            </value>
+            <value>
+                <fullName>Playmaker Channel Partner Support</fullName>
+                <default>false</default>
+                <label>Playmaker Channel Partner Support</label>
+            </value>
+            <value>
+                <fullName>Playmaker Playboox Support</fullName>
+                <default>false</default>
+                <label>Playmaker Playboox Support</label>
+            </value>
+            <value>
+                <fullName>Playmaker Setup and Configuration</fullName>
+                <default>false</default>
+                <label>Playmaker Setup and Configuration</label>
+            </value>
+            <value>
+                <fullName>Playmaker User Support</fullName>
+                <default>false</default>
+                <label>Playmaker User Support</label>
+            </value>
+            <value>
+                <fullName>SFDC Support - Powered by WhiteRock - Peak 1 - Hiker</fullName>
+                <default>false</default>
+                <label>SFDC Support - Powered by WhiteRock - Peak 1 - Hiker</label>
+            </value>
+            <value>
+                <fullName>SFDC Support - Powered by WhiteRock - Peak 2 - Backpacker</fullName>
+                <default>false</default>
+                <label>SFDC Support - Powered by WhiteRock - Peak 2 - Backpacker</label>
+            </value>
+            <value>
+                <fullName>SFDC Support - Powered by WhiteRock - Peak 3 - Climber</fullName>
+                <default>false</default>
+                <label>SFDC Support - Powered by WhiteRock - Peak 3 - Climber</label>
+            </value>
+            <value>
+                <fullName>SFDC Support - Powered by WhiteRock - Peak 4 - Free Solo</fullName>
+                <default>false</default>
+                <label>SFDC Support - Powered by WhiteRock - Peak 4 - Free Solo</label>
+            </value>
+            <value>
+                <fullName>WhiteRock Lead Generation Program</fullName>
+                <default>false</default>
+                <label>WhiteRock Lead Generation Program</label>
+            </value>
+            <value>
+                <fullName>WhiteRock Salesforce Assurance Support Services</fullName>
+                <default>false</default>
+                <label>WhiteRock Salesforce Assurance Support Services</label>
+            </value>
+            <value>
+                <fullName>WhiteRock Salesforce Audit</fullName>
+                <default>false</default>
+                <label>WhiteRock Salesforce Audit</label>
+            </value>
+            <value>
+                <fullName>WhiteRock Salesforce Custom Services</fullName>
+                <default>false</default>
+                <label>WhiteRock Salesforce Custom Services</label>
+            </value>
+            <value>
+                <fullName>WhiteRock Salesforce New Implementation</fullName>
+                <default>false</default>
+                <label>WhiteRock Salesforce New Implementation</label>
+            </value>
+            <value>
+                <fullName>WhiteRock Salesforce On Demand Admin</fullName>
+                <default>false</default>
+                <label>WhiteRock Salesforce On Demand Admin</label>
+            </value>
+            <value>
+                <fullName>WhiteRock Salesforce Optimizer</fullName>
+                <default>false</default>
+                <label>WhiteRock Salesforce Optimizer</label>
+            </value>
+            <value>
+                <fullName>WhiteRock Support Report Writer</fullName>
+                <default>false</default>
+                <label>WhiteRock Support Report Writer</label>
+            </value>
+            <value>
+                <fullName>Climber</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Climber</label>
+            </value>
+            <value>
+                <fullName>Free Solo</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Free Solo</label>
+            </value>
+            <value>
+                <fullName>Hiker</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Hiker</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

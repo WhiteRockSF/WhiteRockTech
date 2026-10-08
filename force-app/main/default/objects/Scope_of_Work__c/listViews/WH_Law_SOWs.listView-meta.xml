@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>WH_Law_SOWs</fullName>
+    <columns>NAME</columns>
+    <columns>SOW_Completion_Status__c</columns>
+    <columns>Scope_Start_Date__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>NAME</field>
+        <operation>contains</operation>
+        <value>WH Law</value>
+    </filters>
+    <label>WH Law - SOWs</label>
+</ListView>

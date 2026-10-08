@@ -1,0 +1,25 @@
+.utility-icon {
+    --slds-c-icon-color-background: #0C71C3;
+    border: 1px solid #fff;
+}
+
+.buttonL{
+    --sds-c-button-text-color: #fff;
+    border: 1px solid #0C71C3; 
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.marg {
+    margin-top: 50px !important;
+}
+
+.margBtn {
+    margin-top: 50px !important;
+}
+
+a {
+    color: #fff;
+}

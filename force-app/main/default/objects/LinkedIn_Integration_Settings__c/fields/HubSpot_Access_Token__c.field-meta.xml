@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>HubSpot_Access_Token__c</fullName>
+    <description>HubSpot private app token if not using Named Credential HubSpot (max 255 chars).</description>
+    <label>HubSpot Access Token</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>TextArea</type>
+</CustomField>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CompactLayout xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ACLayout</fullName>
+    <fields>Name</fields>
+    <fields>Plan_Start_Date__c</fields>
+    <fields>Plan_Status__c</fields>
+    <fields>Production__c</fields>
+    <label>ACLayout</label>
+</CompactLayout>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>TaskRayProjectCompletionService</members>
+        <members>TaskRayProjectCompletionServiceTest</members>
+        <members>TaskRayProjectTaskTriggerHandler</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>TaskRayProjectTaskTrigger</members>
+        <name>ApexTrigger</name>
+    </types>
+    <version>63.0</version>
+</Package>

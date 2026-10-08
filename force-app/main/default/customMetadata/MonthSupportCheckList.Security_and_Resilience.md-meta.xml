@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Security and Resilience</label>
+    <protected>false</protected>
+    <values>
+        <field>Check_List_Items__c</field>
+        <value xsi:type="xsd:string">Review active vs. inactive users
+Audit profiles, roles, and permission sets for appropriateness
+Review login history for unusual activity
+Verify MFA and key security settings are in place
+Review backup and data recovery setup status
+Check for security alerts or system warnings
+Identify potential risks or vulnerabilities
+Identify security recommendations</value>
+    </values>
+</CustomMetadata>

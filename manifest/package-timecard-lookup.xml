@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Alias for timecard lookup deploy; use --target-org WR_PRODD (prod where feature works) -->
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>LookupController</members>
+        <members>LookupControllerTest</members>
+        <members>TimerController</members>
+        <members>TimerControllerTest</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>lookupLwc</members>
+        <members>modal</members>
+        <members>timer</members>
+        <members>timers</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <version>63.0</version>
+</Package>

@@ -1,0 +1,306 @@
+<template>
+    <lightning-card title="LinkedIn Ad Metrics → HubSpot" icon-name="custom:custom63">
+        <div class="slds-p-around_medium">
+            <p class="slds-text-body_small slds-m-bottom_medium">
+                Import Professional demographics (Company Name Segment) from CSV or LinkedIn API.
+                Data is stored in Salesforce first, then synced to HubSpot via batch.
+                Duplicate Company + Campaign combinations are updated, not recreated.
+                Companies missing in HubSpot are created automatically.
+            </p>
+
+            <lightning-tabset variant="scoped">
+                <lightning-tab label="Sync">
+                    <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="Campaign Name (from LinkedIn)"
+                                value={campaignName}
+                                onchange={handleCampaignNameChange}
+                                onblur={handleCampaignDefaultsBlur}
+                                required
+                                field-level-help="e.g. May 2026 Manuf Web Conv — saved automatically"
+                            ></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="LinkedIn Campaign Id"
+                                value={linkedInCampaignId}
+                                onchange={handleCampaignIdChange}
+                                onblur={handleCampaignDefaultsBlur}
+                                field-level-help="Numeric id from Campaign Manager (e.g. 4053705874) — saved automatically"
+                            ></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                type="date"
+                                label="Report Start (API fetch)"
+                                value={reportStart}
+                                onchange={handleReportStartChange}
+                            ></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                type="date"
+                                label="Report End (API fetch)"
+                                value={reportEnd}
+                                onchange={handleReportEndChange}
+                                field-level-help="Leave empty to always use today (empty can be saved)"
+                            ></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-m-top_small">
+                            <lightning-button
+                                label="Save Sync Defaults"
+                                variant="neutral"
+                                onclick={handleSaveSyncDefaults}
+                                disabled={isBusy}
+                            ></lightning-button>
+                            <p class="slds-text-body_small slds-m-top_xx-small slds-text-color_weak">
+                                Saves campaign name, campaign id, and report dates for next time.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="slds-m-top_medium slds-grid slds-wrap slds-gutters">
+                        <div class="slds-col slds-size_1-of-1">
+                            <label class="slds-form-element__label">Upload Professional demographics CSV</label>
+                            <input type="file" accept=".csv,text/csv" onchange={handleFileChange} class="slds-m-top_x-small" />
+                            <p class="slds-text-body_small slds-m-top_x-small">
+                                Export: Campaign Manager → Export → Report type: Professional demographics.
+                                Parser uses Company Name Segment rows.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="slds-m-top_medium">
+                        <lightning-button-group>
+                            <lightning-button
+                                label="Fetch from LinkedIn API"
+                                onclick={handleFetchLinkedIn}
+                                disabled={isBusy}
+                                variant="brand-outline"
+                            ></lightning-button>
+                            <lightning-button
+                                label="Push to HubSpot (Batch)"
+                                onclick={handleStartHubSpotBatch}
+                                disabled={isBusy}
+                                variant="brand"
+                            ></lightning-button>
+                        </lightning-button-group>
+                        <p class="slds-text-body_small slds-m-top_x-small slds-text-color_weak">
+                            If a company is not found in HubSpot, it will be created automatically.
+                        </p>
+                        <template lwc:if={showBatchProgress}>
+                            <div class="slds-box slds-m-top_small slds-theme_shade">
+                                <p class="slds-text-body_small">
+                                    <template lwc:if={batchPolling}>
+                                        <lightning-spinner alternative-text="Syncing" size="small" class="slds-m-right_x-small"></lightning-spinner>
+                                    </template>
+                                    Batch: {batchStatusLabel}
+                                </p>
+                                <template lwc:if={hasRecentCompanies}>
+                                    <p class="slds-text-body_small slds-m-top_x-small">
+                                        <strong>Recently synced:</strong> {recentCompaniesText}
+                                    </p>
+                                </template>
+                                <template lwc:if={hasPendingCompanies}>
+                                    <p class="slds-text-body_small slds-m-top_x-small">
+                                        <strong>Still pending:</strong> {pendingCompaniesText}
+                                    </p>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="slds-m-top_large">
+                        <h3 class="slds-text-heading_small slds-m-bottom_small">Stored metrics</h3>
+                        <template lwc:if={isBusy}>
+                            <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                        </template>
+                        <lightning-datatable
+                            key-field="id"
+                            data={metrics}
+                            columns={columns}
+                            hide-checkbox-column
+                        ></lightning-datatable>
+                    </div>
+                </lightning-tab>
+
+                <lightning-tab label="API Settings">
+                    <div class="slds-m-top_small">
+                        <lightning-input
+                            label="LinkedIn Access Token"
+                            type="password"
+                            value={settings.linkedInAccessToken}
+                            data-field="linkedInAccessToken"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                            field-level-help="Long tokens (&gt;255 chars): check Use LinkedIn Named Credential — token is stored securely in Salesforce."
+                        ></lightning-input>
+                        <lightning-input
+                            label="LinkedIn Refresh Token"
+                            type="password"
+                            value={settings.linkedInRefreshToken}
+                            data-field="linkedInRefreshToken"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                            field-level-help="From OAuth token response (refresh_token). Requires Marketing Developer Platform partner access."
+                        ></lightning-input>
+                        <lightning-input
+                            label="LinkedIn Client Id"
+                            value={settings.linkedInClientId}
+                            data-field="linkedInClientId"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                            field-level-help="Developer App Client ID"
+                        ></lightning-input>
+                        <lightning-input
+                            label="LinkedIn Client Secret"
+                            type="password"
+                            value={settings.linkedInClientSecret}
+                            data-field="linkedInClientSecret"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                        ></lightning-input>
+                        <template if:true={settings.linkedInRefreshConfigured}>
+                            <p class="slds-text-color_success slds-text-body_small">Refresh credentials saved. Access token will auto-renew before expiry / on 401.</p>
+                        </template>
+                        <lightning-input
+                            type="checkbox"
+                            label="Use LinkedIn Named Credential"
+                            checked={settings.useLinkedInNamedCredential}
+                            data-field="useLinkedInNamedCredential"
+                            onchange={handleSettingsCheckbox}
+                            field-level-help="Required for LinkedIn tokens longer than 255 characters."
+                        ></lightning-input>
+                        <lightning-input
+                            label="LinkedIn Ad Account URN"
+                            value={settings.linkedInAdAccountUrn}
+                            data-field="linkedInAdAccountUrn"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                            field-level-help="urn:li:sponsoredAccount:..."
+                        ></lightning-input>
+                        <lightning-input
+                            label="LinkedIn API Version"
+                            value={settings.linkedInApiVersion}
+                            data-field="linkedInApiVersion"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                        ></lightning-input>
+                        <lightning-input
+                            label="Default Campaign Name"
+                            value={settings.defaultCampaignName}
+                            data-field="defaultCampaignName"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                            field-level-help="Pre-fills Sync tab; also saved when you import/fetch."
+                        ></lightning-input>
+                        <lightning-input
+                            label="Default LinkedIn Campaign Id"
+                            value={settings.defaultLinkedInCampaignId}
+                            data-field="defaultLinkedInCampaignId"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                        ></lightning-input>
+                        <lightning-input
+                            type="checkbox"
+                            label="Use HubSpot Named Credential"
+                            checked={settings.useHubSpotNamedCredential}
+                            data-field="useHubSpotNamedCredential"
+                            onchange={handleSettingsCheckbox}
+                        ></lightning-input>
+                        <lightning-input
+                            label="HubSpot Access Token (if not using Named Credential)"
+                            type="password"
+                            value={settings.hubSpotAccessToken}
+                            data-field="hubSpotAccessToken"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                        ></lightning-input>
+                        <lightning-input
+                            type="number"
+                            label="HubSpot Batch Size"
+                            value={settings.hubSpotBatchSize}
+                            data-field="hubSpotBatchSize"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                        ></lightning-input>
+                        <lightning-input
+                            type="checkbox"
+                            label="Auto Sync Enabled (scheduled job)"
+                            checked={settings.autoSyncEnabled}
+                            data-field="autoSyncEnabled"
+                            onchange={handleSettingsCheckbox}
+                            field-level-help="Must be ON for the daily job to run. Schedule/Stop buttons below also toggle this."
+                        ></lightning-input>
+                        <lightning-input
+                            type="number"
+                            label="Auto Sync Lookback Days"
+                            value={settings.autoSyncLookbackDays}
+                            data-field="autoSyncLookbackDays"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                        ></lightning-input>
+                        <lightning-input
+                            type="number"
+                            label="Daily run hour (0–23, org timezone)"
+                            value={settings.scheduleHour}
+                            data-field="scheduleHour"
+                            min="0"
+                            max="23"
+                            onchange={handleSettingsChange}
+                            onblur={handleSettingsChange}
+                            field-level-help="e.g. 6 = every day at 06:00 in the Salesforce org timezone"
+                        ></lightning-input>
+                        <div class="slds-box slds-m-top_small slds-theme_shade">
+                            <p class="slds-text-body_small">
+                                <template lwc:if={settings.scheduleJobActive}>
+                                    Job: <strong>Active</strong>
+                                    <template lwc:if={settings.scheduleState}> ({settings.scheduleState})</template>
+                                    <template lwc:if={settings.scheduleNextFire}>
+                                        · Next: {settings.scheduleNextFire}
+                                    </template>
+                                </template>
+                                <template lwc:else>
+                                    Job: <strong>Not scheduled</strong>
+                                </template>
+                            </p>
+                            <p class="slds-text-body_small slds-m-top_xx-small">
+                                Campaigns: {settings.scheduleCampaignSummary}
+                            </p>
+                            <p class="slds-text-body_small slds-m-top_xx-small slds-text-color_weak">
+                                Uses Default Campaign Name/Id from this page + any active LinkedIn Scheduled Campaign metadata.
+                            </p>
+                            <div class="slds-m-top_small">
+                                <lightning-button-group>
+                                    <lightning-button
+                                        label="Schedule Daily Job"
+                                        variant="brand"
+                                        onclick={handleScheduleDaily}
+                                        disabled={isBusy}
+                                    ></lightning-button>
+                                    <lightning-button
+                                        label="Stop Daily Job"
+                                        onclick={handleStopDaily}
+                                        disabled={isBusy}
+                                    ></lightning-button>
+                                </lightning-button-group>
+                            </div>
+                        </div>
+                        <p class="slds-text-body_small slds-m-top_small">
+                            HubSpot mapping: Custom Metadata → LinkedIn HubSpot Config → Default.
+                        </p>
+                        <div class="slds-m-top_medium">
+                            <lightning-button-group>
+                                <lightning-button label="Save Settings" onclick={handleSaveSettings} variant="brand" disabled={isBusy}></lightning-button>
+                                <lightning-button label="Test LinkedIn" onclick={handleTestLinkedIn} disabled={isBusy}></lightning-button>
+                                <lightning-button label="Refresh LinkedIn Token" onclick={handleRefreshLinkedInToken} disabled={isBusy}></lightning-button>
+                                <lightning-button label="Test HubSpot" onclick={handleTestHubSpot} disabled={isBusy}></lightning-button>
+                            </lightning-button-group>
+                        </div>
+                    </div>
+                </lightning-tab>
+            </lightning-tabset>
+        </div>
+    </lightning-card>
+</template>

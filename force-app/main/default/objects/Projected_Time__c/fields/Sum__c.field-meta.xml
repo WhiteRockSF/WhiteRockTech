@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Sum__c</fullName>
+    <formula>Percent_of_Time_for_A_s__c +  Percent_of_Time_for_B_s__c + Percent_of_Time_for_C_s__c + Percent_of_Time_for_D_s__c + Percent_of_Time_for_F_s__c + Percent_of_Time_for_Internal__c</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Sum %</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Percent</type>
+</CustomField>

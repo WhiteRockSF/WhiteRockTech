@@ -1,0 +1,346 @@
+import lookUp from '@salesforce/apex/LookupController.lookUp';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import { getFieldValue, getRecord } from 'lightning/uiRecordApi';
+import { api, LightningElement, track, wire } from 'lwc';
+
+let FIELDS = ['Production__c.Name'];
+let FIELDSC = [
+    'TASKRAY__Project_Task__c.Name',
+    'TASKRAY__Project_Task__c.TASKRAY__Project__r.Name'
+];
+let FIELDSP = ['Product2.Name'];
+
+export default class LookupLwc extends LightningElement {
+
+    @api valueId;
+    @api objName;
+    @api iconName;
+    @api labelName;
+    @api readOnly = false;
+    @api filter = '';
+    @api showLabel = false;
+    @api uniqueKey;
+    
+    objLabelName;
+
+    /*Create Record Start*/
+    @api createRecord;
+    @track recordTypeOptions;
+    @track createRecordOpen;
+    @track recordTypeSelector;
+    @track mainRecord;
+    @track isLoaded = false;
+
+    //stencil
+    @track cols = [1,2];
+    @track opacs = ['opacity: 1', 'opacity: 0.9', 'opacity: 0.8', 'opacity: 0.7', 'opacity: 0.6', 'opacity: 0.5', 'opacity: 0.4', 'opacity: 0.3', 'opacity: 0.2', 'opacity: 0.1'];
+    @track double = true;
+
+    //For Stencil
+    @track stencilClass = '';
+    @track stencilReplacement = 'slds-hide';  
+    //css
+    @track myPadding = 'slds-modal__content';
+    /*Create Record End*/
+
+    searchTerm;
+    @track valueObj;
+    href;
+    @track options; //lookup values
+    @track isValue;
+    @track blurTimeout;
+
+    blurTimeout;
+
+    //css
+    @track boxClass = 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-has-focus';
+    @track inputClass = '';
+
+    @track objN = '';
+
+    get fields() {
+        if (this.objName === 'TASKRAY__Project_Task__c') {
+            return FIELDSC;
+        }
+        if (this.objName === 'Product2') {
+            return FIELDSP;
+        }
+        if (this.objName) {
+            return [`${this.objName}.Name`];
+        }
+        return FIELDS;
+    }
+
+    get isTaskRayTask() {
+        return this.objName === 'TASKRAY__Project_Task__c';
+    }
+
+    connectedCallback() {
+        
+    //    console.log("objName", this.objName);
+       // FIELDS.push(this.objName+'.Name');
+        // console.log("FIELDS", this.fields);
+    }
+    renderedCallback() {
+        if(this.objName) {
+            let temp = this.objName;
+            if(temp.includes('__c')){
+                let newObjName = temp.replace(/__c/g,"");
+                if(newObjName.includes('_')) {
+                    let vNewObjName = newObjName.replace(/_/g," ");
+                    this.objLabelName = vNewObjName;
+                }else {
+                    this.objLabelName = newObjName;
+                }
+                
+            }else {
+                this.objLabelName = this.objName;
+            }
+        }
+
+      //  console.log("In rendered", this.objName);
+        this.objN = this.objName;
+    }
+
+    //Used for creating Record Start
+    @wire(getObjectInfo, { objectApiName: '$objName' })
+    wiredObjectInfo({ error, data }) {
+        if (data) {
+            this.objectInfo = data;
+            this.error = undefined;
+
+            let recordTypeInfos = Object.entries(this.objectInfo.recordTypeInfos);
+           // console.log("ObjectInfo length", recordTypeInfos.length);
+            if (recordTypeInfos.length > 1) {
+                let temp = [];
+                recordTypeInfos.forEach(([key, value]) => {
+                  //  console.log(key);
+                    if (value.available === true && value.master !== true) {
+                        //console.log("Inside ifff",JSON.stringify(key,value));
+                        
+                        temp.push({"label" : value.name, "value" : value.recordTypeId});
+                    }
+                });
+                this.recordTypeOptions = temp;
+              //  console.log("recordTypeOptions", this.recordTypeOptions);
+            } else {
+                this.recordTypeId = this.objectInfo.defaultRecordTypeId;
+            }
+
+          //  console.log("this.recordTypeOptions", JSON.stringify(this.recordTypeOptions));
+        } else if (error) {
+            this.error = error;
+            this.objectInfo = undefined;
+          //  console.log("this.error1", this.error);
+        }
+    }
+    //Used for creating Record End
+
+    @wire(lookUp, {searchTerm : '$searchTerm', myObject : '$objName', filter : '$filter'})
+    wiredRecords({ error, data }) {
+        if (data) {
+            this.error = undefined;
+            this.options = data;
+            
+            
+         //   console.log("common this.options", JSON.stringify(this.options));
+        } else if (error) {
+            this.error = error;
+            this.options = undefined;
+       //     console.log("wire.error",this.error);
+        }
+    }
+
+    
+
+    //To get preselected or selected record
+    @wire(getRecord, { recordId: '$valueId', fields: '$fields' })
+
+    wiredOptions({ error, data }) {
+        if (!this.valueId) {
+            this.isValue = false;
+            this.valueObj = undefined;
+            return;
+        }
+        if (data) {
+            this.uiRecord = data;
+            this.error = undefined;
+            if (this.isTaskRayTask) {
+                const taskName = getFieldValue(this.uiRecord, 'TASKRAY__Project_Task__c.Name');
+                const projectName = getFieldValue(this.uiRecord, 'TASKRAY__Project_Task__c.TASKRAY__Project__r.Name');
+                this.valueObj = projectName ? `${taskName} * ${projectName}` : taskName;
+            } else if (this.valueId.startsWith('500')) {
+                this.valueObj = getFieldValue(this.uiRecord, 'Case.CaseNumber');
+            } else if (this.objName) {
+                this.valueObj = getFieldValue(this.uiRecord, `${this.objName}.Name`);
+            } else {
+                this.valueObj = getFieldValue(this.uiRecord, 'Production__c.Name');
+            }
+            this.href = '/' + this.uiRecord.id;
+            this.isValue = true;
+          //  console.log("this.href", this.href);
+          //  console.log("this.record", JSON.stringify(this.record));
+        } else if (error) {
+            this.error = error;
+            this.uiRecord = undefined;
+            if (!this.isValue) {
+                this.valueObj = undefined;
+            }
+
+            //console.log("this.error2", this.error);
+            // console.log("this.fields", this.fields1);
+        }
+    }
+
+    //when valueId changes
+    valueChange() {
+       // console.log("In valueChange");
+    }
+
+    handleClick() {
+      //  console.log("In handleClick");
+
+        this.searchTerm = '';
+        this.inputClass = 'slds-has-focus';
+        this.boxClass = 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-has-focus slds-is-open';
+        //let combobox = this.template.querySelector('#box');
+        //combobox.classList.add("slds-is-open"); 
+    }
+
+    inblur() {
+      //  console.log("In inblur");
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        this.blurTimeout = setTimeout(() =>  {this.boxClass = 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-has-focus'}, 300);
+    }
+
+    onSelect(event) {
+      //  console.log("In onSelect");
+        let ele = event.currentTarget;
+        let selectedId = ele.dataset.id;
+        const selected = Array.isArray(this.options)
+            ? this.options.find((option) => option.Id === selectedId)
+            : null;
+        if (selected) {
+            this.valueObj = selected.Name;
+            this.href = `/${selectedId}`;
+            this.isValue = true;
+            this.searchTerm = '';
+            this.inputClass = '';
+        }
+       // console.log("selectedId", selectedId);
+        //As a best practise sending selected value to parent and inreturn parent sends the value to @api valueId
+        let key = this.uniqueKey;
+        const valueSelectedEvent = new CustomEvent('valueselect', {
+            detail: { selectedId, key },
+        });
+        this.dispatchEvent(valueSelectedEvent);
+
+        if(this.blurTimeout) {
+            clearTimeout(this.blurTimeout);
+        }
+        this.boxClass = 'slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-has-focus';
+    }
+
+    onChange(event) {
+     //   console.log("In onChange");
+        this.searchTerm = event.target.value;
+    //    console.log("searchTerm",this.searchTerm);
+    }
+
+    handleRemovePill() {
+    //    console.log("In handleRemovePill");
+        this.isValue = false;
+        let selectedId = '';
+        let key = this.uniqueKey;
+        const valueSelectedEvent = new CustomEvent('valueselect', {
+            detail: { selectedId, key },
+        });
+        this.dispatchEvent(valueSelectedEvent);
+    }
+
+    createRecordFunc() {
+        if (this.recordTypeOptions) {
+            this.recordTypeSelector = true;
+        }else {
+            this.recordTypeSelector = false;
+            this.mainRecord = true;
+            //stencil before getting data
+            this.stencilClass = '';
+            this.stencilReplacement = 'slds-hide';
+        }
+        this.createRecordOpen = true;
+    }
+
+    handleRecTypeChange(event) {
+       // console.log("In handleRecTypeChange", event.target.value);
+        this.recordTypeId = event.target.value;
+    }
+
+    createRecordMain() {
+        this.recordTypeSelector = false;
+        this.mainRecord = true;
+        //stencil before getting data
+        this.stencilClass = '';
+        this.stencilReplacement = 'slds-hide';
+    }
+
+    handleLoad(event) {
+        let details = event.detail;
+
+        if(details) {
+            setTimeout(() => {
+                this.stencilClass = 'slds-hide';
+                this.stencilReplacement = '';
+                this.myPadding = 'slds-p-around_medium slds-modal__content';
+            }, 1000);
+        }
+
+    }
+
+    handleSubmit() {
+        this.template.querySelector('lightning-record-form').submit();
+    }
+
+    handleSuccess(event) {
+ 
+        this.createRecordOpen = false;
+        this.mainRecord = false;
+        this.stencilClass = '';
+        this.stencilReplacement = 'slds-hide';
+
+        let selectedId = event.detail.id;
+        let key = this.uniqueKey;
+        const valueSelectedEvent = new CustomEvent('valueselect', {
+            detail: { selectedId, key },
+        });
+        this.dispatchEvent(valueSelectedEvent);
+
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title : 'Success',
+                message : `Record saved successfully with id: ${event.detail.id}`,
+                variant : 'success',
+            }),
+        )
+    }
+
+    handleError() {
+
+        this.dispatchEvent(
+            new ShowToastEvent({
+                title : 'Error',
+                message : 'Error saving the record',
+                variant : 'error',
+            }),
+        )
+    }
+
+    closeModal() {
+        this.stencilClass = '';
+        this.stencilReplacement = 'slds-hide';
+        this.createRecordOpen = false;
+        this.recordTypeSelector = false;
+        this.mainRecord = false;
+    }
+}

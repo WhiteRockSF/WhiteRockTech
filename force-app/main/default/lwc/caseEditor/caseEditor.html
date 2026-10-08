@@ -1,0 +1,59 @@
+<template>
+    <!-- 
+    <div class="slds-grid slds-p-large">
+        <div class="slds-col">
+            <lightning-record-form record-id={recordId} object-api-name="Opportunity" columns="2"
+                mode="edit" onsubmit={handleSubmit} fields={fields}>
+            
+              </lightning-record-form>
+        </div>
+    </div> -->
+    <template if:true={isSpinner}>
+        <div class="slds-spinner_container" style="position: fixed">
+            <lightning-spinner alternative-text="Loading" variant="brand" size="large">
+            </lightning-spinner>
+        </div>
+    </template>
+    
+    <div class="slds-grid slds-p-large">
+        <div class="slds-col">
+            <div class="slds-text-heading_medium slds-align_absolute-center">Edit</div>
+        </div>
+    </div>
+    <div class="slds-grid slds-p-large">
+        <div class="slds-col">
+            <div class="slds-text-heading_medium">&nbsp;</div>
+        </div>
+    </div>
+    <div class="slds-grid slds-p-large">
+        <div class="slds-col">
+            <lightning-record-edit-form record-id="" object-api-name="Case" onsubmit={handleSubmit}>
+
+                <div class="slds-grid slds-p-around_large">
+                    <div class="slds-col slds-size_1-of-1 slds-text-heading_medium">
+                        Support Ticket Information
+                    </div>
+                </div>
+
+                <div class="slds-grid">
+                    <div class="slds-col slds-size_1-of-1">
+                        <lightning-input-field field-name="Type"> </lightning-input-field>
+                        <lightning-input-field field-name="Subject"> </lightning-input-field> 
+                        <lightning-input-field field-name="Trello_Description__c"> </lightning-input-field>
+
+                    </div>
+                    
+                </div>
+  
+                <div class="slds-col">
+                    <div class="slds-align_absolute-center"><lightning-button class="slds-m-top_small" variant="brand"
+                            type="submit" name="Save" label="Save">
+                        </lightning-button></div>
+                </div>
+            </lightning-record-edit-form>
+        </div>
+    </div>
+
+
+
+</template>

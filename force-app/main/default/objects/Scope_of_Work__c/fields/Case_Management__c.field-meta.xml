@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Case_Management__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <inlineHelpText>Used to track cases that get opened related to building the scope of work for the opportunity</inlineHelpText>
+    <label>Case Management</label>
+    <referenceTo>Case</referenceTo>
+    <relationshipLabel>Scopes of Work</relationshipLabel>
+    <relationshipName>Scopes_of_Work</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,169 @@
+<template>
+    <lightning-card title="Buyer Intent - HubSpot Visitor Data" icon-name="standard:marketing_actions">
+        <div slot="actions">
+            <lightning-button 
+                label="Test Connection" 
+                icon-name="utility:connected_apps" 
+                onclick={handleTestConnection}
+                disabled={isLoading}
+                class="slds-m-right_x-small">
+            </lightning-button>
+            <lightning-button 
+                label="Refresh" 
+                icon-name="utility:refresh" 
+                onclick={handleRefresh}
+                disabled={isLoading}>
+            </lightning-button>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <!-- Statistics Cards -->
+            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Filtered Companies</div>
+                        <div class="stat-value">{totalCompanies}</div>
+                        <div class="stat-sublabel">Based on current filters</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Page Views</div>
+                        <div class="stat-value">{totalPageViews}</div>
+                        <div class="stat-sublabel">All time (from HubSpot)</div>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Unique Visitors</div>
+                        <div class="stat-value">{totalUniqueVisitors}</div>
+                        <div class="stat-sublabel">All time (from HubSpot)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-input 
+                        type="search" 
+                        label="Search Companies" 
+                        value={searchTerm}
+                        onchange={handleSearch}
+                        placeholder="Search by name, industry, or country">
+                    </lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-combobox
+                        label="Time Frame"
+                        value={timeFrame}
+                        options={timeFrameOptions}
+                        onchange={handleTimeFrameChange}>
+                    </lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <lightning-combobox
+                        label="Filter by Intent Level"
+                        value={selectedFilter}
+                        options={filterOptions}
+                        onchange={handleFilterChange}>
+                    </lightning-combobox>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <template if:true={isLoading}>
+                <div class="slds-align_absolute-center slds-m-vertical_large">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <!-- Error Message -->
+            <template if:true={error}>
+                <div class="slds-m-around_medium">
+                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                        <span class="slds-assistive-text">error</span>
+                        <h2>Error loading data. Please check your HubSpot integration settings.</h2>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Data Table -->
+            <template if:false={isLoading}>
+                <template if:true={paginatedCompanies}>
+                    <lightning-datatable
+                        key-field="companyName"
+                        data={paginatedCompanies}
+                        columns={columns}
+                        onsort={handleSort}
+                        sorted-by={sortBy}
+                        sorted-direction={sortDirection}
+                        hide-checkbox-column
+                        show-row-number-column>
+                    </lightning-datatable>
+                </template>
+
+                <template if:false={filteredCompanies.length}>
+                    <div class="slds-align_absolute-center slds-m-vertical_large">
+                        <p class="slds-text-body_regular slds-text-color_weak">
+                            No companies found matching your criteria.
+                        </p>
+                    </div>
+                </template>
+
+                <!-- Pagination -->
+                <template if:true={showPagination}>
+                    <div class="slds-m-top_medium">
+                        <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                            <div class="slds-col">
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    Showing {pageInfo}
+                                </p>
+                            </div>
+                            <div class="slds-col">
+                                <lightning-button-group>
+                                    <lightning-button 
+                                        label="First" 
+                                        onclick={handleFirst}
+                                        disabled={disablePrevious}>
+                                    </lightning-button>
+                                    <lightning-button 
+                                        icon-name="utility:chevronleft" 
+                                        onclick={handlePrevious}
+                                        disabled={disablePrevious}>
+                                    </lightning-button>
+                                    <lightning-button 
+                                        label={currentPage}
+                                        disabled>
+                                    </lightning-button>
+                                    <lightning-button 
+                                        icon-name="utility:chevronright" 
+                                        onclick={handleNext}
+                                        disabled={disableNext}>
+                                    </lightning-button>
+                                    <lightning-button 
+                                        label="Last" 
+                                        onclick={handleLast}
+                                        disabled={disableNext}>
+                                    </lightning-button>
+                                </lightning-button-group>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <!-- Auto-refresh and limitation notice -->
+            <div class="slds-m-top_medium slds-text-align_center">
+                <p class="slds-text-body_small slds-text-color_weak">
+                    <lightning-icon icon-name="utility:clock" size="xx-small"></lightning-icon>
+                    Data refreshes automatically every 5 minutes
+                </p>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                    <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                    Note: Page Views and Unique Visitors show all-time totals per company
+                </p>
+            </div>
+        </div>
+    </lightning-card>
+</template>

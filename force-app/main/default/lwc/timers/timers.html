@@ -1,0 +1,474 @@
+<template>
+    <template if:true={isSpinner}>
+        <div class="slds-spinner_container" style="position: fixed; z-index: 9999;">
+            <lightning-spinner alternative-text="Loading" variant="brand" size="large">
+            </lightning-spinner>
+        </div>
+    </template>
+
+    <lightning-card>
+        <div slot="title">
+            <div class="slds-media slds-media_center">
+                <div class="slds-media__figure">
+                    <lightning-icon icon-name="standard:timesheet" size="small"></lightning-icon>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <span>Time Cards</span>
+                    </h2>
+                </div>
+            </div>
+        </div>
+        
+        <div slot="actions" class="action-buttons">
+            <div class="total-display slds-m-right_medium">
+                <span class="total-label">Period Total:</span>
+                <span class="total-value">
+                    <lightning-formatted-number value={totalOfPer}></lightning-formatted-number>
+                </span>
+                <span class="total-separator">|</span>
+                <span class="total-label">Working Hours in Month:</span>
+                <span class="total-value">
+                    <lightning-formatted-number value={monthlyWorkingHours}></lightning-formatted-number>
+                </span>
+                <span class="total-separator">|</span>
+                <span class="total-label">Remaining to 8h:</span>
+                <span class="total-value">
+                    <lightning-formatted-number value={remainingTo8hMonth}></lightning-formatted-number>
+                </span>
+                <template if:true={canDownloadCsv}>
+                    <span class="total-separator">|</span>
+                    <span class="total-label">Max can track:</span>
+                    <span class="total-value">
+                        <lightning-formatted-number value={maxCanTrackMonth}></lightning-formatted-number>
+                    </span>
+                </template>
+            </div>
+            <template if:true={canDownloadCsv}>
+                <lightning-button
+                    label="Download CSV"
+                    title="Download CSV for current month"
+                    icon-name="utility:download"
+                    onclick={downloadCsv}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+            </template>
+            <lightning-button-icon 
+                icon-name="utility:add" 
+                alternative-text="Add New Time Card"
+                title="Add New Time Card"
+                variant="brand"
+                class="add-button"
+                onclick={add}>
+            </lightning-button-icon>
+        </div>
+
+        <!-- Calendar Navigation -->
+        <div class="calendar-navigation slds-p-horizontal_medium slds-p-vertical_small">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                <div class="slds-col">
+                    <h2 class="calendar-month-year">{currentMonth} {currentYear}</h2>
+                </div>
+                <div class="slds-col slds-no-flex">
+                    <lightning-button-icon 
+                        icon-name="utility:chevronleft" 
+                        alternative-text="Previous Month"
+                        title="Previous Month"
+                        variant="border"
+                        onclick={previousMonth}
+                        class="slds-m-right_xx-small">
+                    </lightning-button-icon>
+                    <lightning-button 
+                        label="Today" 
+                        onclick={goToToday}
+                        class="slds-m-horizontal_xx-small">
+                    </lightning-button>
+                    <lightning-button-icon 
+                        icon-name="utility:chevronright" 
+                        alternative-text="Next Month"
+                        title="Next Month"
+                        variant="border"
+                        onclick={nextMonth}
+                        class="slds-m-left_xx-small">
+                    </lightning-button-icon>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Container -->
+        <div class="calendar-container slds-p-horizontal_medium slds-p-bottom_medium">
+            <!-- Calendar Grid -->
+            <div class="calendar-grid">
+                <!-- Day Headers -->
+                <div class="calendar-header">
+                    <div class="calendar-day-header">
+                        <div class="day-header-content">Sunday</div>
+                    </div>
+                    <div class="calendar-day-header">
+                        <div class="day-header-content">Monday</div>
+                    </div>
+                    <div class="calendar-day-header">
+                        <div class="day-header-content">Tuesday</div>
+                    </div>
+                    <div class="calendar-day-header">
+                        <div class="day-header-content">Wednesday</div>
+                    </div>
+                    <div class="calendar-day-header">
+                        <div class="day-header-content">Thursday</div>
+                    </div>
+                    <div class="calendar-day-header">
+                        <div class="day-header-content">Friday</div>
+                    </div>
+                    <div class="calendar-day-header">
+                        <div class="day-header-content">Saturday</div>
+                    </div>
+                </div>
+
+                <!-- Calendar Weeks -->
+                <template for:each={calendarDays} for:item="week">
+                    <div key={week.key} class="calendar-week">
+                        <template for:each={week.days} for:item="day">
+                            <div key={day.key} 
+                                 data-date={day.dateStr}
+                                 data-is-empty={day.isEmpty}
+                                 data-is-today={day.isToday}
+                                 class="calendar-day"
+                                 onclick={handleDayClick}>
+                                
+                                <template if:false={day.isEmpty}>
+                                    <div class="day-number">{day.day}</div>
+                                    
+                                    <!-- Daily Total Badge -->
+                                    <template if:true={day.totalHours}>
+                                        <div class="day-total-badge">
+                                            {day.totalHours} hrs
+                                        </div>
+                                    </template>
+
+                                    <!-- Remaining to 8h for weekdays -->
+                                    <template if:true={day.remainingTo8}>
+                                        <div class="day-remaining-badge">
+                                            +{day.remainingTo8} hrs
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Time Cards in this day -->
+                                    <div class="day-cards">
+                                        <template for:each={day.cards} for:item="card">
+                                            <div key={card.key} 
+                                                 class="time-card"
+                                                 title={card.ProductionName}>
+                                                <div class="card-header">
+                                                    <div class="card-production" 
+                                                         data-card-id={card.Id}
+                                                         data-card-key={card.key}
+                                                         onclick={handleCardClick}>{card.ProductionName}</div>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:delete"
+                                                        alternative-text="Delete"
+                                                        title="Delete Time Card"
+                                                        variant="bare"
+                                                        size="x-small"
+                                                        class="card-delete-button"
+                                                        data-card-id={card.Id}
+                                                        data-card-key={card.key}
+                                                        onclick={handleDeleteCard}>
+                                                    </lightning-button-icon>
+                                                </div>
+                                                <div data-card-id={card.Id}
+                                                     data-card-key={card.key}
+                                                     onclick={handleCardClick}>
+                                                    <template if:true={card.displayNotes}>
+                                                        <div class="card-notes">
+                                                            <lightning-icon icon-name="utility:note" size="xx-small" class="note-icon"></lightning-icon>
+                                                            {card.displayNotes}
+                                                        </div>
+                                                    </template>
+                                                    <div class="card-hours"> 
+                                                        {card.totalHours} hrs
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Fill Plan (what to enter in timesheet) -->
+        <template if:true={canDownloadCsv}>
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <div class="slds-box slds-theme_default">
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_small">
+                        <div class="slds-text-title_bold">
+                            Timesheet fill plan (status + remaining): {fillPlanTotal} hrs
+                        </div>
+                        <div class="slds-no-flex">
+                            <lightning-button
+                                label="Download Fill Plan CSV"
+                                title="Download suggested entries for timesheet"
+                                icon-name="utility:download"
+                                onclick={downloadFillPlanCsv}>
+                            </lightning-button>
+                        </div>
+                    </div>
+
+                    <template if:true={fillPlan.length}>
+                        <div class="slds-scrollable_y big-table">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_fixed-layout">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"><div class="slds-truncate" title="Date">Date</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Task">Task</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Hours">Hours</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Source">Source</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Hint">Hint</div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={fillPlan} for:item="row">
+                                        <tr key={row.key}>
+                                            <td><div class="slds-truncate" title={row.date}>{row.date}</div></td>
+                                            <td>
+                                                <template if:true={row.taskUrl}>
+                                                    <lightning-formatted-url value={row.taskUrl} label={row.taskName} target="_self"></lightning-formatted-url>
+                                                </template>
+                                                <template if:false={row.taskUrl}>
+                                                    <div class="slds-truncate" title={row.taskName}>{row.taskName}</div>
+                                                </template>
+                                            </td>
+                                            <td><div class="slds-truncate" title={row.hours}>{row.hours}</div></td>
+                                            <td><div class="slds-truncate" title={row.source}>{row.source}</div></td>
+                                            <td><div class="slds-truncate" title={row.hint}>{row.hint}</div></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={fillPlan.length}>
+                        <div class="slds-text-body_small slds-text-color_weak">
+                            No fill plan items (either month is already full, or no eligible tasks found).
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- Chatter activity & mentions (this month) -->
+        <template if:true={canDownloadCsv}>
+            <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+                <div class="slds-box slds-theme_default">
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-m-bottom_small">
+                        <div class="slds-text-title_bold">
+                            Chatter activity on my tasks (mentions: {chatterMentionsCount})
+                        </div>
+                        <div class="slds-no-flex">
+                            <lightning-button
+                                label="Download Chatter CSV"
+                                title="Download chatter activity for this month"
+                                icon-name="utility:download"
+                                onclick={downloadChatterCsv}>
+                            </lightning-button>
+                            <lightning-button
+                                label="Download Month Context (JSON)"
+                                title="Download all month info for ChatGPT"
+                                icon-name="utility:download"
+                                class="slds-m-left_x-small"
+                                onclick={downloadMonthContextJson}>
+                            </lightning-button>
+                        </div>
+                    </div>
+
+                    <template if:true={chatterActivity.length}>
+                        <div class="slds-scrollable_y big-table">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_fixed-layout">
+                                <thead>
+                                    <tr>
+                                        <th scope="col"><div class="slds-truncate" title="When">When</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Task">Task</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Author">Author</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Mine">Mine</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Mention">Mention</div></th>
+                                        <th scope="col"><div class="slds-truncate" title="Snippet">Snippet</div></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={chatterActivity} for:item="row">
+                                        <tr key={row.key}>
+                                            <td><div class="slds-truncate" title={row.createdDate}>{row.createdDate}</div></td>
+                                            <td>
+                                                <lightning-formatted-url value={row.parentUrl} label={row.taskName} target="_self"></lightning-formatted-url>
+                                            </td>
+                                            <td><div class="slds-truncate" title={row.authorName}>{row.authorName}</div></td>
+                                            <td><div class="slds-truncate" title={row.isByMe}>{row.isByMe}</div></td>
+                                            <td><div class="slds-truncate" title={row.isMention}>{row.isMention}</div></td>
+                                            <td><div class="slds-truncate" title={row.snippet}>{row.snippet}</div></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={chatterActivity.length}>
+                        <div class="slds-text-body_small slds-text-color_weak">
+                            No chatter activity found for selected month/tasks.
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </lightning-card>
+
+    <!-- Add New Time Card Modal -->
+    <c-modal header-text={modalTitle} onclose={handleModalClose}>
+        <div slot="content" class="modal-form-content">
+            <div class="slds-form" role="list">
+                <!-- Production Field -->
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element slds-form-element_stacked">
+                            <label class="slds-form-element__label">
+                                <abbr class="slds-required" title="required">*</abbr>
+                                Production
+                            </label>
+                            <div class="slds-form-element__control">
+                                <c-lookup-lwc 
+                                    unique-key="newCard" 
+                                    value-id={newCard.Production__c}
+                                    obj-name="Production__c" 
+                                    icon-name="custom:custom85" 
+                                    label-name="Production"
+                                    onvalueselect={handleNewCardSelection}
+                                    data-field="Production__c">
+                                </c-lookup-lwc>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TaskRay Task Field -->
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element slds-form-element_stacked">
+                            <label class="slds-form-element__label">TaskRay Task</label>
+                            <div class="slds-form-element__control">
+                                <c-lookup-lwc 
+                                    unique-key="newCardTask" 
+                                    value-id={newCard.TaskRay_Task__c}
+                                    obj-name="TASKRAY__Project_Task__c"
+                                    icon-name="custom:custom105" 
+                                    label-name="TaskRay Task"
+                                    onvalueselect={handleNewCardSelection}
+                                    data-field="TaskRay_Task__c">
+                                </c-lookup-lwc>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Field -->
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element slds-form-element_stacked">
+                            <label class="slds-form-element__label">
+                                <abbr class="slds-required" title="required">*</abbr>
+                                Service
+                            </label>
+                            <div class="slds-form-element__control">
+                                <c-lookup-lwc 
+                                    unique-key="newCardService" 
+                                    value-id={newCard.Service__c}
+                                    obj-name="Product2"
+                                    icon-name="custom:custom93" 
+                                    label-name="Service"
+                                    onvalueselect={handleNewCardSelection}
+                                    data-field="Service__c">
+                                </c-lookup-lwc>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date of Service -->
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element slds-form-element_stacked">
+                            <lightning-input 
+                                name="Date_of_Service__c" 
+                                label="Date of Service"
+                                type="date" 
+                                value={newCard.Date_of_Service__c}
+                                onchange={handleNewCardChange}
+                                required>
+                            </lightning-input>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hours -->
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element slds-form-element_stacked">
+                            <lightning-input 
+                                name="Hours__c" 
+                                label="Hours"
+                                type="number" 
+                                value={newCard.Hours__c}
+                                onchange={handleNewCardChange}
+                                min="0.25"
+                                max="24"
+                                step="0.25"
+                                formatter="decimal"
+                                placeholder="e.g., 1.5 or 7.75"
+                                required>
+                            </lightning-input>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Service Notes -->
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element slds-form-element_stacked">
+                            <lightning-textarea 
+                                name="Service_Notes__c" 
+                                label="Service Notes"
+                                value={newCard.Service_Notes__c}
+                                onchange={handleNewCardChange}
+                                placeholder="Enter service notes..."
+                                required>
+                            </lightning-textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div slot="footer" class="modal-footer-buttons">
+            <lightning-button 
+                label="Cancel" 
+                onclick={handleModalClose}
+                class="slds-m-right_x-small">
+            </lightning-button>
+            <template if:true={newCard.isEditing}>
+                <lightning-button 
+                    label="Remove" 
+                    variant="destructive"
+                    onclick={handleDeleteCardFromModal}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+            </template>
+            <lightning-button 
+                variant="brand" 
+                label={modalButtonLabel} 
+                onclick={handleAddNewCard}
+                class="add-card-button">
+            </lightning-button>
+        </div>
+    </c-modal>
+</template>

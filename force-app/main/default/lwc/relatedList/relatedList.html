@@ -1,0 +1,81 @@
+<template>
+    <template if:true={isSpinner}>
+        <div class="slds-spinner_container" style="position: fixed">
+            <lightning-spinner alternative-text="Loading" variant="brand" size="large">
+            </lightning-spinner>
+        </div>
+    </template>
+    <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <lightning-icon if:true={iconName} icon-name={iconName} size="small"></lightning-icon>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <span class="slds-card__header-link">{title}</span>
+                    </h2>
+                </div>
+
+                <lightning-button-group>
+                    <lightning-combobox
+                    name="Status"
+                    label="Status"
+                    value={value}
+                    variant="label-hidden"
+                    placeholder="Select Status"
+                    options={options}
+                    onchange={handleChange} ></lightning-combobox>
+                    <lightning-button variant="Neutral" label="Create New Support Ticket" onclick={createNew}
+                        if:true={showAddButton}></lightning-button>
+                    <lightning-button-icon icon-name="utility:refresh" onclick={refresh}></lightning-button-icon>
+                </lightning-button-group>
+            </header>
+        </div>
+        <div class="slds-card__body" style={customStyle}>
+            <template if:true={ready}>
+                <c-datatable editable={editable} s-object={sObject} fields={fields} sorted-by={sortedBy}
+                    sorted-direction={sortedDirection} filter={filter} hide-checkbox-column={hideCheckboxColumn}
+                    enable-infinite-loading={enableInfiniteLoading} records-per-batch={recordsPerBatch}
+                    initial-records={initialRecords} enable-live-updates={enableLiveUpdates} show-soql={showSoql}
+                    custom-coloum={customColoum}>
+                </c-datatable>
+            </template>
+        </div>
+    </article>
+    <c-modal header-text={addRecordTitle} hide-footer="true" onclose={handleNewCancel} data-id="new">
+
+        <lightning-record-edit-form slot="content" object-api-name={sObject} onsubmit={handleSubmit}
+            onsuccess={handleSuccess} oncancel={handleCancel}>
+            <lightning-input-field field-name="Type"></lightning-input-field>
+            
+            <lightning-input-field field-name="Subject" required="required"></lightning-input-field>
+
+            <label class="slds-form-element__label" for="TrelloDescription">
+                <abbr class="slds-required" title="required">* </abbr>Description of issue</label>
+            <lightning-input-field id="TrelloDescription" field-name="Trello_Description__c" required="required"
+                variant="label-hidden"></lightning-input-field>
+
+
+            <div class="slds-var-m-top_medium slds-text-align_center">
+                <lightning-button variant="brand" type="submit" label="Submit">
+                </lightning-button> &nbsp;
+                <lightning-button variant="brand-outline" onclick={close} label="Cancel">
+                </lightning-button>
+            </div>
+        </lightning-record-edit-form>
+
+    </c-modal>
+    <c-modal header-text="Add Related Files" hide-footer="true" onclose={handleFileCancel} data-id="files">
+        <div slot="content">
+            <lightning-file-upload name="fileUploader" accept={acceptedFormats} record-id={recId}
+                onuploadfinished={handleUploadFinished} multiple></lightning-file-upload>
+            <div class="slds-var-m-top_medium slds-text-align_center">
+                <lightning-button variant="brand" onclick={closeF} label="Skip">
+                </lightning-button> &nbsp;
+                <!-- <lightning-button variant="brand-outline" onclick={closeF} label="Cancel">
+                </lightning-button> -->
+            </div>
+        </div>
+    </c-modal>
+</template>

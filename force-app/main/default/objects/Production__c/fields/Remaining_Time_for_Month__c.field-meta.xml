@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Remaining_Time_for_Month__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF( Opportunity_Service__r.Annual_Hours__c = FALSE,Hours_per_Month__c - Time_for_Month__c, Hours_per_Month__c - Total_Production_Time__c)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Remaining Time for Month or Year</label>
+    <precision>18</precision>
+    <required>false</required>
+    <scale>2</scale>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
+</CustomField>

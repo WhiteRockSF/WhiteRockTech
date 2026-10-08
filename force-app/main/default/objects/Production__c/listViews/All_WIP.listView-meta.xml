@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_WIP</fullName>
+    <columns>Credit_Status__c</columns>
+    <columns>Proactive_Support_Management__c</columns>
+    <columns>CREATED_DATE</columns>
+    <columns>Completed_Invoiced__c</columns>
+    <columns>NAME</columns>
+    <columns>Account_Name__c</columns>
+    <columns>TaskRay_Project__c</columns>
+    <columns>Customer_Grade__c</columns>
+    <columns>Work_In_Process_Status__c</columns>
+    <columns>Contract_Amount__c</columns>
+    <columns>LAST_ACTIVITY</columns>
+    <columns>Contract_Level__c</columns>
+    <columns>X100_Billable__c</columns>
+    <columns>Hours_per_Month__c</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Completed_Invoiced__c</field>
+        <operation>equals</operation>
+        <value>0</value>
+    </filters>
+    <filters>
+        <field>Work_In_Process_Status__c</field>
+        <operation>equals</operation>
+        <value>New,In Process</value>
+    </filters>
+    <label>All WIP</label>
+</ListView>

@@ -1,0 +1,13 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId">
+     
+<aura:html tag="style">
+    .slds-modal__container{
+        height : auto;
+        width: 85%;
+        max-width: 85rem;
+    }       
+</aura:html>
+    <aura:if isTrue="{!v.recordId}">
+        <c:caseEditor recordId="{!v.recordId}" onclose="{!c.closeQA}"></c:caseEditor>     
+    </aura:if>
+</aura:component>

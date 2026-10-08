@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cannot_be_more_than_100</fullName>
+    <active>true</active>
+    <errorConditionFormula>(Sum__c) &gt;= 1.00000000001</errorConditionFormula>
+    <errorMessage>The sum cannot be more than 100%</errorMessage>
+</ValidationRule>

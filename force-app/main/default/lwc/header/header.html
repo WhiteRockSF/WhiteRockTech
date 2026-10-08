@@ -1,0 +1,64 @@
+<template>
+    <template if:true={isSpinner}>
+        <div class="slds-spinner_container" style="position: fixed">
+            <lightning-spinner alternative-text="Loading" variant="brand" size="large">
+            </lightning-spinner>
+        </div>
+    </template>
+    <div style="background-color: #0C71C3;">
+
+        <div class="slds-grid slds-wrap">
+            <div class="slds-col slds-size_1-of-8">
+                <img src={icon} class="slds-m-around_large">
+                <!--  -->
+            </div>
+            <div class="slds-col slds-size_3-of-8">
+
+            </div>
+            <div class="slds-col slds-size_3-of-8 slds-text-color_inverse slds-text-align_right">
+                <div class="marg" if:true={isLogin}>
+
+                    <a href={url}>{user.FirstName}&nbsp;{user.LastName} &nbsp;
+
+
+                        <lightning-icon icon-name="action:user" alternative-text="Preview" title="Preview"
+                            class="utility-icon"></lightning-icon></a>
+                </div>
+
+            </div>
+            <div class="slds-col slds-size_1-of-8 slds-text-align_center">
+                <div class="margBtn" if:true={isLogin}>
+                    <lightning-button label="Logout" title="logout" onclick={logout} variant="Neutral"
+                        class="slds-m-left_x-small slds-m-right_x-small  "></lightning-button>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+    <c-modal header-text="Contact Information" hide-footer="true" onclose={handleNewCancel} data-id="new" hide-cancel="false" >
+
+        <lightning-record-edit-form slot="content" object-api-name="Contact" onsubmit={handleSubmit}
+            onsuccess={handleSuccess} oncancel={handleCancel}>
+            <div class="slds-p-around_medium lgc-bg">
+                Why do we need your first and last  name?
+                <lightning-helptext content="
+                We use your first and last name to keep  track of support tickets associated with  you, ensuring personalized and efficient  assistance.  
+              
+                Thank you for helping us serve you better!"></lightning-helptext>
+            </div>
+            <lightning-input-field field-name="FirstName" required="required"></lightning-input-field>
+            <lightning-input-field field-name="LastName" required="required"></lightning-input-field>
+
+
+            <div class="slds-var-m-top_medium slds-text-align_center">
+                <lightning-button variant="brand" type="submit" label="Save">
+                </lightning-button>
+            </div>
+        </lightning-record-edit-form>
+
+    </c-modal>
+
+</template>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Billing_Completion_Status__c</fullName>
+    <label>OLDBilling Completion Status</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Work In Process - Not Billed Currently</fullName>
+                <default>true</default>
+                <label>Work In Process - Not Billed Currently</label>
+            </value>
+            <value>
+                <fullName>Billed against contract</fullName>
+                <default>false</default>
+                <label>Billed against contract</label>
+            </value>
+            <value>
+                <fullName>Managed Service Agreement Work</fullName>
+                <default>false</default>
+                <label>Managed Service Agreement Work</label>
+            </value>
+            <value>
+                <fullName>Change order billing</fullName>
+                <default>false</default>
+                <label>Change order billing</label>
+            </value>
+            <value>
+                <fullName>Write down/off of work</fullName>
+                <default>false</default>
+                <label>Write down/off of work</label>
+            </value>
+            <value>
+                <fullName>Warranty work</fullName>
+                <default>false</default>
+                <label>Warranty work</label>
+            </value>
+            <value>
+                <fullName>In lieu of/Trade</fullName>
+                <default>false</default>
+                <label>In lieu of/Trade</label>
+            </value>
+            <value>
+                <fullName>Other (Please specify)</fullName>
+                <default>false</default>
+                <label>Other (Please specify)</label>
+            </value>
+            <value>
+                <fullName>Account on Hold - Temporary Posting to Clear</fullName>
+                <default>false</default>
+                <label>Account on Hold - Temporary Posting to Clear</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

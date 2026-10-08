@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Service__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Replacing the Service Performed with Service ID</description>
+    <inlineHelpText>Replacing the Service Performed with Service ID</inlineHelpText>
+    <label>Service</label>
+    <referenceTo>Product2</referenceTo>
+    <relationshipLabel>Service Timecards</relationshipLabel>
+    <relationshipName>Service_Timecards</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

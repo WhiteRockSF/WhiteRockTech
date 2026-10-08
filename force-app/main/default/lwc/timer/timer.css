@@ -1,0 +1,8 @@
+div .slds-no-flex {
+    display: flex !important;
+
+}
+
+.req {
+    border: 2px solid red;
+}

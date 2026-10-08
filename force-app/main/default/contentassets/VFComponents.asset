@@ -1,0 +1,943 @@
+"ID","NAMESPACEPREFIX","NAME","APIVERSION","MASTERLABEL","DESCRIPTION","CONTROLLERTYPE","CONTROLLERKEY","MARKUP","CREATEDDATE","CREATEDBYID","LASTMODIFIEDDATE","LASTMODIFIEDBYID","SYSTEMMODSTAMP"
+"09915000000b1rTAAQ","","Lightning_Lookup","36.0","Lightning_Lookup","","3","core.apexpages.components.cdk.NullController","<apex:component >
+  
+  <script>
+      var __sfdcSessionId = '{!GETSESSIONID()}';
+  </script>
+  <script src=""/soap/ajax/28.0/connection.js"" type=""text/javascript""></script>
+  <script src=""/soap/ajax/28.0/apex.js"" type=""text/javascript""></script>
+  
+  <script>
+      //script for lookup
+        var searchIcon = ""{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#search')}"";
+            
+        //variable for create more than one lookup on one page
+        var slookupSCount = 0;
+        
+        var ObjArr = new Array();
+        var iconUrlArr = new Array();
+        var iconClassArr = new Array();
+        var sinputName = new Array();
+        var sinputId = new Array();
+        var slk = new Array();
+      	var packageNameSpace = '';
+        //variable for pass selected object in populateSLookup function on keyup on input field
+        var slookupObject;
+        var picklistClassGloble = []; 
+        function createLookup(divId,inputN,inputI,objName,iconURL,iconClass,picklistClass){
+            
+            slookupSCount += 1;
+            picklistClassGloble[slookupSCount - 1] = (picklistClass != undefined && picklistClass != null && picklistClass.trim().length > 0) ? picklistClass : '';
+            sinputName[slookupSCount-1] = inputN;
+            sinputId[slookupSCount-1] = inputI;
+            ObjArr[slookupSCount-1] = objName;
+            iconUrlArr[slookupSCount-1] = iconURL;
+            iconClassArr[slookupSCount-1] =  iconClass;
+            
+            //empty given div
+            $(""[id$="" + divId + ""]"").html('');
+            
+            //give important attributes and class to given div
+            $(""[id$="" + divId + ""]"").addClass('slds-lookup');
+            $(""[id$="" + divId + ""]"").attr('data-select','multi');
+            $(""[id$="" + divId + ""]"").attr('data-scope','single');
+            $(""[id$="" + divId + ""]"").attr('data-typeahead','true');
+            
+            //Make lightning required multi lookup elements
+            var elementMain = '<div class=""slds-form-element"">';
+            elementMain += '<div class=""slds-form-element__control"">';
+            elementMain += '<div class=""slds-lookup__control slds-input-has-icon slds-input-has-icon--right Lookup' + slookupSCount + ' "">'
+            elementMain += '<svg aria-hidden=""true"" class=""search' + slookupSCount + ' slds-input__icon"">';
+            elementMain += '<use xlink:href=""' + searchIcon + '""></use>';
+            elementMain += '</svg>';
+            elementMain += '</div>';
+            elementMain += '</div>';
+            elementMain += '<div class=""slds-lookup__menu sMenuRec' + slookupSCount + ' slds-hide"" role=""listbox"">';
+            elementMain += '</div>';
+            elementMain += '</div>';
+            
+            //Put these elements to given div
+            $(""[id$="" + divId + ""]"").html(elementMain);
+            
+            //get input field and replace it from its own place to lookup control div
+            var inputField = $(""[id$="" + sinputName[slookupSCount-1] + ""]"").get();
+            $(""[id$="" + sinputName[slookupSCount-1] + ""]"").remove();
+            $("".search"" + slookupSCount).before(inputField); 
+            $(""[id$="" + sinputName[slookupSCount-1] + ""]"").addClass(""slds-input"");
+            $(""[id$="" + sinputName[slookupSCount-1] + ""]"").attr(""onfocus"",""showSLookup(""+ slookupSCount + "")"");
+            $(""[id$="" + sinputName[slookupSCount-1] + ""]"").attr('style','margin-left:0px;padding-left:12px');
+            
+            $(""[id$="" + sinputName[slookupSCount-1] + ""]"").attr(""onkeyup"",""populateSLookup("" + slookupSCount + "");"");
+            $(""[id$="" + sinputName[slookupSCount-1] + ""]"").attr('placeholder','Input Here');
+            
+            populateSLookup(slookupSCount);
+                           
+            clearAll(slookupSCount);
+        }
+        
+        function clearAll(cnt){
+            $('[id$=' + sinputName[cnt-1] + ']').val('');
+            $('[id$=' + sinputId[cnt-1] + ']').val('');
+        }
+         function populateSLookup(cnt){
+                var SObjType = ObjArr[cnt-1];
+                var queryStatement;
+                var queryField;
+                var lkpDiv = 'sMenuRec'+cnt;
+                if(SObjType.toLowerCase() == 'case'){
+                    queryField = 'CaseNumber';
+                } else if(SObjType.toLowerCase() == 'contract'){
+                    queryField = 'ContractNumber';
+                } else if(SObjType.toLowerCase() == 'solution'){
+                    queryField = 'SolutionName';
+                } else if(SObjType.toLowerCase().indexOf('pbxprocess__c') != -1){
+                	queryField = packageNameSpace + 'Name__c';
+                } else{
+                    queryField = 'Name';    
+                }
+                var userclause = '';
+                if(SObjType.toLowerCase()== 'user')
+                	userclause =  ' AND isActive = true ';
+                else if(SObjType.toLowerCase().indexOf('pbxprocess__c') != -1)
+                	userclause = ' AND ' + packageNameSpace + 'publishDate__c != null AND ' + packageNameSpace + 'parentpublishprocess__c = null and '+packageNameSpace+'version__c = \'2\'' ;
+                
+                var otherClause = '';
+                if(($('[id$=' + sinputName[cnt-1] + ']').val() != undefined) && $('[id$='+ sinputName[cnt-1] + ']').val().trim().length > 0  ){ 
+                    queryStatement = ""SELECT Id, ""+queryField+"" FROM "" + SObjType + "" where ""+ queryField + "" like '%"" + $('[id$=' + sinputName[cnt-1] + ']').val() + ""%' ""+userclause+"" LIMIT 50"";
+                }else{
+                	otherClause = (SObjType.toLowerCase()== 'user' ? ' WHERE isActive = true ': SObjType.toLowerCase().indexOf('pbxprocess__c') != -1 ? ' WHERE '+ packageNameSpace +'publishDate__c != null AND '+packageNameSpace+'parentpublishprocess__c = null and '+packageNameSpace+'version__c = \'2\'' : ' ');
+                    queryStatement = 'SELECT Id, '+queryField+' FROM ' + SObjType +' '+otherClause+' LIMIT 50';
+                }
+                
+                var queryResult = sforce.connection.query( queryStatement );
+                if( queryResult.size > 0){
+                    $('[id$=' + sinputId[cnt-1] + ']').val('');
+                    var html = '<ul class=""slds-lookup__list"" role=""presentation"" >';
+                    var recordArr = queryResult.getArray('records');
+                    for (var i = 0; i <recordArr.length; i++) {
+                        var obj = recordArr[i];
+                                                  
+                        html += '<li class=""slds-lookup__item"" role=""presentation"">';
+                        html += '<a class=""' + picklistClassGloble[cnt - 1] + '"" href=""javascript:void(0)"" role=""option"" onclick=""setPicklistValue(\'' + obj[queryField] + '\', \'' + recordArr[i].Id + '\',\''+picklistClassGloble[cnt - 1]+'\'); setSLookupValue(\'' + obj[queryField] + '\', \'' + recordArr[i].Id + '\', ' + cnt + ', \'' + lkpDiv + '\')"">';
+                        if(iconUrlArr[cnt-1] != ''){
+                            html += '<svg aria-hidden=""true"" class=""slds-icon ' + iconClassArr[cnt-1] + ' slds-icon--small"">';
+                            html += '<use xlink:href=""' + iconUrlArr[cnt-1] + '""></use></svg>'; 
+                        }   
+                        html +=  obj[queryField] + '</a>';
+                        html += '</li>';
+                    }
+                    html += '</ul>';
+                    $('.' + lkpDiv).html(html);
+                }else{
+                    $('.' + lkpDiv).html('');
+                    $('[id$=' + sinputId[cnt-1] + ']').val('');                    
+                }
+                
+            }
+            
+            function setSLookupValue(nmold, lkpid,count ,lkpDiv){                             
+                $('[id$=' + sinputId[count-1] + ']').val(lkpid);
+                $('[id$=' + sinputName[count-1] + ']').val(nmold);
+                $('.'+lkpDiv).addClass('slds-hide');
+                
+            }
+            
+            function setPicklistValue(name, id, pickClass){
+            
+            }
+            
+            //hide opened section on document click
+            $(document).click(function(event) {
+              ele = event.target;
+              if($(ele).prop('tagName') == 'HTML' || $(ele).prop('tagName') == 'FORM' || $(ele).prop('tagName') == 'DIV'){
+                if(slookupSCount > 0){
+                    for(var i = 1;i <= slookupSCount; i++){
+                        if($('.sMenuRec'+i) != undefined && !$('.sMenuRec'+i).hasClass('slds-hide')){
+                            $('.sMenuRec'+i).addClass('slds-hide');  
+                        }
+                        
+                    }
+                }
+              }
+            });
+            function showSLookup( count ){
+                $('.sMenuRec'+count).removeClass('slds-hide');
+                
+            }
+  </script>
+        
+</apex:component>","2016-02-08T08:16:17.000Z","00515000006PjX3AAK","2016-05-23T13:55:24.000Z","00515000006PjX3AAK","2016-05-23T13:55:24.000Z"
+"09915000000b62QAAQ","","LightningDatePicker","33.0","LightningDatePicker","This is a generic template for Visualforce Component.  With this template, you may adjust the default elements and values and add new elements and values.","3","core.apexpages.components.cdk.NullController","<apex:component >
+<Script>
+    var monthDays = [31,28,31,30,31,30,31,31,30,31,30,31];
+    var monthName = ['January', 'Feburary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var curDate ;
+    var selDate;
+    function showDatePicker( pickerDiv ){
+        $('#' + pickerDiv ).toggleClass('slds-hide');
+    }
+    function showHideComp( compId ){
+        $('#' + compId ).toggleClass('slds-hide');
+    }
+    
+    
+    function createDatePicker(tdy, pickerDiv, inputDate){
+    
+        var outputDiv = $('#' + pickerDiv);
+        $('#'+inputDate).attr('onfocus','showDatePicker( \'' + pickerDiv + '\')');
+        var myDate = tdy; 
+        curDate = myDate; 
+        myDate.setDate(1);
+        //$('#month').text( monthName[myDate.getMonth()] );
+        //$('#year').text( myDate.getFullYear() );
+        //console.log(myDate);
+        
+        var html ='';
+        
+        html += '<div class=""slds-datepicker__filter slds-grid"">';
+        html += '<div class=""slds-datepicker__filter--month slds-grid slds-grid--align-spread slds-size--3-of-4"">';
+                  
+        html += '<div class=""slds-align-middle"" role=""button"" aria-labelledby=""bn_prev-label"" tabindex=""0"">';
+        html += '<button class=""slds-button slds-button--icon-container"" onclick=""prevMonth(\'' + pickerDiv + '\', \'' + inputDate + '\')"">';
+        html += '<svg aria-hidden=""true"" class=""slds-button__icon slds-button__icon--small"">';
+        html += '<use xlink:href=""{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#left')}""></use>';
+        html += '</svg>';
+        html += '<span class=""slds-assistive-text"">Previous Month</span>';
+        html += '</button>';
+        html += '</div>';
+                    
+        html += '<div id=""month"" class=""slds-align-middle"" role=""heading"" aria-live=""assertive"" aria-atomic=""true"">' + monthName[myDate.getMonth()] + '</div>';
+        html += '<div class=""slds-align-middle"" role=""button"" aria-labelledby=""bn_next-label"" tabindex=""0"">';
+        html += '<button class=""slds-button slds-button--icon-container"" onclick=""nextMonth(\'' + pickerDiv + '\', \'' + inputDate + '\')"">';
+        html += '<svg aria-hidden=""true"" class=""slds-button__icon slds-button__icon--small"">';
+        html += '<use xlink:href=""{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#right')}""></use>';
+        html += '</svg>';
+        html += '<span class=""slds-assistive-text"">Next Month</span>';
+        html += '</button>';
+        html += '</div>';
+        html += '</div>';
+        html += '<div class=""slds-picklist datepicker__filter--year slds-shrink-none"">';
+        html += '<button id=""year"" class=""slds-button slds-button--neutral slds-picklist__label"" aria-haspopup=""true"" aria-expanded=""false"" onclick=""showHideComp( \'' + pickerDiv + 'YrList\' )"">' + myDate.getFullYear();
+        html += '<svg aria-hidden=""true"" class=""slds-icon slds-icon--small"">'
+        html += '<use xlink:href=""{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#down')}""></use>'
+        html += '</svg>';
+        html += '</button>';
+        html += '<div class=""slds-dropdown slds-dropdown--left  slds-dropdown--menu slds-hide"" id=""' + pickerDiv + 'YrList"" style=""overflow-wrap: inherit; overflow-y: scroll; height: 200px;"">';
+        html += '<ul class=""slds-dropdown__list"" role=""menu"">';
+        for( var k = 2000; k <= 2025; k++ ){
+            html += '<li id=""yr' + k + '"" href=""#"" class=""slds-dropdown__item slds-has-icon--left"" onclick=""yearChanged( \'' + pickerDiv + '\', \'' + inputDate + '\', this)""><a href=""#"" class=""slds-truncate"" role=""menuitemradio"">' + k + '</a></li>';
+        }
+        html += '</ul>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+        
+        html += '<table class=""datepicker__month"" role=""grid"" aria-labelledby=""month"" tabindex=""0"" id=""mthTable"">';
+        html += '<thead><tr id=""weekdays""><th id=""Sunday""><abbr title=""Sunday"">S</abbr></th><th id=""Monday""><abbr title=""Monday"">M</abbr></th>';
+        html += '<th id=""Tuesday""><abbr title=""Tuesday"">T</abbr></th><th id=""Wednesday""><abbr title=""Wednesday"">W</abbr></th><th id=""Thursday"">';
+        html += '<abbr title=""Thursday"">T</abbr></th><th id=""Friday""><abbr title=""Friday"">F</abbr></th><th id=""Saturday""><abbr title=""Saturday"">S</abbr>'
+        html += '</th></tr></thead>';
+        html += '<tbody><tr>';
+        var k = 1;
+        console.log('Month' + (myDate.getMonth()));
+        for(var i=0; k<= monthDays[ myDate.getMonth() ]; i++){
+            if(i % 7 ==0){
+                html += '</tr><tr>';
+            }
+            if(i < myDate.getDay()){
+                html += '<td role=""gridcell"" aria-selected=""false""><span class=""slds-day""></span></td>';
+            }
+            else{
+                html += '<td role=""gridcell"" aria-selected=""false"" class=""day"" onclick=""selDateFun(this, \'' + pickerDiv + '\', \'' + inputDate + '\')""><span class=""slds-day"">' + k + '</span></td>';
+                k ++;
+            }
+        }
+        html += '</tr></tbody></table>';
+        /*if( document.getElementById('mthTable') == null )
+            $('#myDatePicker').append(html);
+        else
+            $('#mthTable').replaceWith(html);
+        console.log(html);*/
+        $('#' + pickerDiv).html(html);
+    }
+    function nextMonth( pickerDiv, inputDate ){
+        var tdy = curDate;
+        if( tdy.getMonth() != 11){
+            tdy.setMonth( tdy.getMonth() +1)
+            curDate = tdy;
+            createDatePicker ( tdy, pickerDiv, inputDate );
+        }    
+        else{
+            tdy.setMonth( 0 );
+            tdy.setYear( tdy.getFullYear() + 1 );
+            curDate = tdy;
+            createDatePicker ( tdy, pickerDiv, inputDate );
+        }
+        
+    }
+    
+    function prevMonth( pickerDiv, inputDate ){
+        var tdy = curDate;
+        if( tdy.getMonth() != 0){
+            tdy.setMonth( tdy.getMonth() - 1)
+            curDate = tdy;
+            createDatePicker ( tdy, pickerDiv, inputDate );
+        }    
+        else{
+            tdy.setMonth( 11 );
+            tdy.setYear( tdy.getFullYear() - 1 );
+            curDate = tdy;
+            createDatePicker ( tdy, pickerDiv, inputDate );
+        }
+        
+    }
+    function yearChanged( pickerDiv, inputDate, comp ){
+        var tdy = curDate;
+        console.log( $(comp).text() );
+        tdy.setYear( parseInt( $(comp).text() ) );
+        createDatePicker (tdy, pickerDiv, 'datepicker');
+        curDate = tdy;
+    }  
+    function selDateFun( cmp, pickerDiv, inputDate){
+        $('.day').removeClass('slds-is-selected');
+        $(cmp).addClass('slds-is-selected');
+        var dy = $(cmp).text();
+        selDate = new Date(curDate);
+        selDate.setDate( parseInt(dy)  );
+        $('#' + inputDate).val( (selDate.getMonth() + 1) + '/' + selDate.getDate() + '/' + selDate.getFullYear());
+        $('#' + pickerDiv).addClass('slds-hide');
+    }
+</Script>
+</apex:component>","2016-04-12T06:16:55.000Z","00515000006PjX3AAK","2016-04-12T06:22:49.000Z","00515000006PjX3AAK","2016-04-12T06:22:49.000Z"
+"09915000000b0oEAAQ","","LightningRecordDetailFooterComponent","35.0","LightningRecordDetailFooterComponent","","2","LightningRecordDetailHeaderController","<apex:component controller=""LightningRecordDetailHeaderController"" allowDML=""true"">
+
+<script>
+    var assetsLocation = '{!URLFOR($Resource.slds)}';
+
+    $.aljsInit({
+        assetsLocation: assetsLocation,
+        scoped: true
+    });
+</script>  
+<apex:attribute name=""opp"" type=""opportunity"" description=""get opportunity object"" assignTo=""{!oppObj}"" required=""true""/>      
+<html xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"">
+    <apex:variable value=""{!if(oppObj.StageName != null ,true,false)}"" var=""statusFlag""/>
+    <head>
+        <meta http-equiv=""X-UA-Compatible"" content=""IE=Edge""/>
+        <style>
+            <!-- For make checkbox blue -->    
+            <!--
+            .slds .slds-checkbox [type=""checkbox""]:checked ~ .slds-checkbox--faux:after {
+               border-bottom: 2px solid white;
+               border-left: 2px solid white;
+            }
+           .slds-checkbox--faux{
+               background-color:#1589ee;            
+           }
+           .slds .slds-checkbox .slds-checkbox--faux{
+               background-color:#1589ee;
+               border:0;
+           }
+           .slds .slds-checkbox [type=""checkbox""]:focus:checked ~ .slds-checkbox--faux {
+               background-color:#1589ee;
+           }
+           -->
+           <!-- For make checkbox blue -->  
+           
+            
+        </style>
+     </head>
+     
+    <body class=""slds"">
+        <!-- tabs for details  -->
+        <div class=""slds-grid slds-wrap slds-m-left--medium slds-m-top--large"">
+            <div class=""slds-col--padded slds-size--8-of-12"">
+                <div class=""slds-tabs--default"" data-aljs=""tabs"">
+                    <ul class=""slds-tabs--default__nav"" role=""tablist"">
+                        <li class=""slds-tabs--default__item slds-text-heading--label"" title=""Item One""><a class=""slds-tabs--default__link "" href=""#"" role=""tab"" tabindex=""0"" aria-selected=""true"" aria-controls=""tab-activity"" data-aljs-show=""tab-activity"">Activity</a></li>
+                        <li class=""slds-tabs--default__item slds-text-heading--label"" title=""Item Two""><a class=""slds-tabs--default__link"" href=""#"" role=""tab"" tabindex=""-1"" aria-selected=""false"" aria-controls=""tab-collaborate"" data-aljs-show=""tab-collaborate"">Collaborate</a></li>
+                        <li class=""slds-tabs--default__item slds-text-heading--label"" title=""Item Three""><a class=""slds-tabs--default__link"" href=""#"" role=""tab"" tabindex=""-1"" aria-selected=""false"" aria-controls=""tab-detail"" data-aljs-show=""tab-detail"">Details</a></li>
+                    </ul>
+                    <div id=""tab-activity"" class=""slds-tabs--default__content slds-hide"" role=""tabpanel"">
+                        <!-- Activities -->
+                        <section aria-labelledby=""Next Activities"">
+                            <h2 id=""badges"" class=""slds-text-heading--small slds-m-vertical--large"">Next Steps</h2>
+                            
+                            <ul class=""timeline"">
+                            <apex:repeat value=""{!NextTaskList}"" var=""t"">
+                            
+                              <li class=""slds-timeline__item"">
+                                <div class=""slds-media"">
+                                  <div class=""slds-media__body"">
+                                    <div class=""slds-media slds-media--timeline {!if(CONTAINS(t.subject,'Email:'),'slds-timeline__media--email','slds-timeline__media--task')}"">
+                                      <div class=""slds-media__figure"">
+                                        <svg aria-hidden=""true"" class=""slds-icon {!if(CONTAINS(t.subject,'Email:'),'slds-icon-standard-email','slds-icon-standard-task')} slds-timeline__icon"">
+                                          <use xlink:href=""{!if(CONTAINS(t.subject,'Email:'),URLFOR($Resource.slds, 'assets/icons/standard-sprite/svg/symbols.svg#email'),URLFOR($Resource.slds, 'assets/icons/standard-sprite/svg/symbols.svg#task'))}""></use>
+                                        </svg>
+                                      </div>
+                                      <div class=""slds-media__body"">
+                                          <p class=""slds-tile__title slds-truncate""><a href=""/{!t.id}"">{!t.subject}</a></p>
+                                          <p class=""slds-text-body--regular"">{!t.description}</p>
+                                     </div>
+                                    </div>
+                                  </div>
+                                  <div class=""slds-media__figure slds-media__figure--reverse"">
+                                    <div class=""slds-timeline__actions"">
+                                      <p class=""slds-timeline__date"">{!CASE(Month(t.activitydate), 1,'Jan',2,'Feb',3,'Mar',4,'Apr',5,'May',3,'Jun',3,'Jul',3,'Aug',3,'Sep',3,'Oct',3,'Nov',3,'Dec','Invalid')} {!DAY(t.activitydate)}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            </apex:repeat>
+                            </ul>
+                        </section>
+                        
+                        <section aria-labelledby=""Next Activities"">
+                            <h2 id=""badges"" class=""slds-text-heading--small slds-m-vertical--large"">Past Activity</h2>
+                            
+                            <ul class=""timeline"">
+                            <apex:repeat value=""{!PastTaskList}"" var=""t"">
+                            
+                              <li class=""slds-timeline__item"">
+                                <div class=""slds-media"">
+                                  <div class=""slds-media__body"">
+                                    <div class=""slds-media slds-media--timeline {!if(CONTAINS(t.subject,'Email:'),'slds-timeline__media--email','slds-timeline__media--task')}"">
+                                      <div class=""slds-media__figure"">
+                                        <svg aria-hidden=""true"" class=""slds-icon {!if(CONTAINS(t.subject,'Email:'),'slds-icon-standard-email','slds-icon-standard-task')} slds-timeline__icon"">
+                                          <use xlink:href=""{!if(CONTAINS(t.subject,'Email:'),URLFOR($Resource.slds, 'assets/icons/standard-sprite/svg/symbols.svg#email'),URLFOR($Resource.slds, 'assets/icons/standard-sprite/svg/symbols.svg#task'))}""></use>
+                                        </svg>
+                                      </div>
+                                      <div class=""slds-media__body"">
+                                          <p class=""slds-tile__title slds-truncate""><a href=""/{!t.id}"">{!t.subject}</a></p>
+                                          <p class=""slds-text-body--regular"">{!t.description}</p>
+                                     </div>
+                                    </div>
+                                  </div>
+                                  <div class=""slds-media__figure slds-media__figure--reverse"">
+                                    <div class=""slds-timeline__actions"">
+                                      <p class=""slds-timeline__date"">{!CASE(Month(t.activitydate), 1,'Jan',2,'Feb',3,'Mar',4,'Apr',5,'May',3,'Jun',3,'Jul',3,'Aug',3,'Sep',3,'Oct',3,'Nov',3,'Dec','Invalid')} {!DAY(t.activitydate)}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            </apex:repeat>
+                            </ul>
+                        </section>
+                        
+                        <!-- Activities -->
+                    </div>
+                    <div id=""tab-collaborate"" class=""slds-tabs--default__content slds-hide"" role=""tabpanel"">
+                        <h2>Item Two Content</h2>
+                    </div>
+                    <div id=""tab-detail"" class=""slds-tabs--default__content slds-hide"" role=""tabpanel"">
+                        <!-- Opportunity Details -->
+                        <div class=""slds-grid  slds-wrap slds-form--vertical slds-p-vertical--x-small slds-m-top--medium"">
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Opportunity Owner</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <a href=""/{!oppObj.ownerid}""><apex:outputField styleclass=""slds-text-body--regular "" value=""{!oppObj.owner.name}"" /></a>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Amount</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.amount}"" />
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Private</label>
+                                    <div class=""slds-form-element__control"">
+                                        <label class=""slds-checkbox"">
+                                            <apex:inputField value=""{!oppObj.isPrivate}"" onclick=""return false"" />
+                                            <span class=""slds-checkbox--faux""></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Expected Revenue</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.ExpectedRevenue}"" />
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Opportunity Name</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.name}"" />
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Close Date</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.closedate}"" />
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Account Name</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <a href=""/{!oppObj.accountid}""><apex:outputField styleclass=""slds-text-body--regular "" value=""{!oppObj.account.name}"" /></a>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Next Step</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.NextStep}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Type</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.type}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Stage</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.stagename}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Lead Source</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.LeadSource}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Probability</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.Probability}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Order Number</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.OrderNumber__c}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">  Primary Campaign Source</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.Campaign.name}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Current Generator(s)</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.CurrentGenerators__c}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Main Competitor(s)</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.MainCompetitors__c}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Delivery/Installation Status</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.DeliveryInstallationStatus__c}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Tracking Number</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <apex:outputField value=""{!oppObj.TrackingNumber__c}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>    
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Created By</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <a href=""/{!oppObj.createdbyid}""><apex:outputField value=""{!oppObj.createdby.name}""/></a>, <apex:outputField value=""{!oppObj.createddate}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>    
+                            <div class=""slds-large-size--1-of-2 slds-col--padded"">
+                                <div class=""slds-form-element"">
+                                    
+                                    <label class=""slds-text-body--small slds-form-element__label slds-form-element__label--small"">Last Modified By</label>
+                                    <div class=""slds-form-element__control slds-p-top--xx-small"">
+                                        <a href=""/{!oppObj.lastmodifiedbyid}""><apex:outputField value=""{!oppObj.lastmodifiedby.name}""/></a>, <apex:outputField value=""{!oppObj.lastmodifieddate}""/>
+                                    </div>
+                                </div>
+                                <hr style=""margin-top:10px;margin-bottom:0px""/>
+                            </div>  
+                        </div>        
+                    </div>
+                </div>
+            </div>
+            <div class=""slds-col--padded slds-size--4-of-12"">
+            </div>
+        </div>
+        
+        
+        
+        
+        
+        <script>
+            $(document).ready(function() {
+                $('[data-aljs=""tabs""]').tabs();
+            });
+            
+        </script>
+    </body>
+</html>
+</apex:component>","2016-01-21T10:06:58.000Z","00515000006PjX3AAK","2016-01-21T10:21:18.000Z","00515000006PjX3AAK","2016-01-21T10:21:18.000Z"
+"09915000000b0eYAAQ","","LightningRecordDetailHeaderComponent","35.0","LightningRecordDetailHeaderComponent","","2","LightningRecordDetailHeaderController","<apex:component controller=""LightningRecordDetailHeaderController"" allowDML=""true"">
+
+<script>
+    var assetsLocation = '{!URLFOR($Resource.slds)}';
+
+    $.aljsInit({
+        assetsLocation: assetsLocation,
+        scoped: true
+    });
+</script>  
+<apex:attribute name=""opp"" type=""opportunity"" description=""get opportunity object"" assignTo=""{!oppObj}"" required=""true""/>      
+<html xmlns=""http://www.w3.org/2000/svg"" xmlns:xlink=""http://www.w3.org/1999/xlink"">
+    <apex:variable value=""{!if(oppObj.StageName != null ,true,false)}"" var=""statusFlag""/>
+    <head>
+        <style>
+            <!-- For make checkbox blue -->    
+            <!--
+            .slds .slds-checkbox [type=""checkbox""]:checked ~ .slds-checkbox--faux:after {
+               border-bottom: 2px solid white;
+               border-left: 2px solid white;
+            }
+           .slds-checkbox--faux{
+               background-color:#1589ee;            
+           }
+           .slds .slds-checkbox .slds-checkbox--faux{
+               background-color:#1589ee;
+               border:0;
+           }
+           .slds .slds-checkbox [type=""checkbox""]:focus:checked ~ .slds-checkbox--faux {
+               background-color:#1589ee;
+           }
+           -->
+           <!-- For make checkbox blue -->  
+           
+            
+        </style>
+     </head>
+     
+    <body class=""slds"">
+        <div class=""slds-page-header"" role=""banner"">
+          <div class=""slds-grid slds-wrap"">
+            <div class=""slds-col slds-has-flexi-truncate"">
+              <div class=""slds-media"">
+                <div class=""slds-media__figure"">
+                  <svg aria-hidden=""true"" class=""slds-icon slds-icon--large slds-icon-standard-opportunity"">
+                    <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}""></use>
+                  </svg>
+                </div>
+                <div class=""slds-media__body"">
+                  <p class=""slds-text-heading--label"">OPPORTUNITY</p>
+                  <div class=""slds-grid"">
+                    <h1 class=""slds-text-heading--medium slds-m-right--small slds-truncate slds-align-middle oppName"" title=""{!oppObj.name}"">{!oppObj.name}</h1>
+                    <div class=""slds-col slds-shrink-none"">
+                      <button class=""slds-button slds-button--neutral slds-not-selected"" aria-live=""assertive"">
+                        <span class=""slds-text-not-selected"">
+                          <svg aria-hidden=""true"" class=""slds-button__icon--stateful slds-button__icon--left"">
+                            <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#add')}""></use>
+                          </svg>Follow</span>
+                        <span class=""slds-text-selected"">
+                          <svg aria-hidden=""true"" class=""slds-button__icon--stateful slds-button__icon--left"">
+                            <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                          </svg>Following</span>
+                        <span class=""slds-text-selected-focus"">
+                          <svg aria-hidden=""true"" class=""slds-button__icon--stateful slds-button__icon--left"">
+                            <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#close')}""></use>
+                          </svg>Unfollow</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class=""slds-col slds-no-flex slds-align-bottom"">
+              <div class=""slds-button-group"" role=""group"">
+                <button class=""slds-button slds-button--neutral"">Edit</button>
+                <button class=""slds-button slds-button--neutral"">Delete</button>
+                <button class=""slds-button slds-button--neutral"">Clone</button>
+                <div class=""slds-button--last"">
+                  <button class=""slds-button slds-button--icon-border-filled"">
+                    <svg aria-hidden=""true"" class=""slds-button__icon"">
+                      <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#down')}""></use>
+                    </svg>
+                    <span class=""slds-assistive-text"">More</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class=""slds-grid slds-page-header__detail-row slds-m-left--medium slds-m-top--medium"">
+            <div class=""slds-col--padded slds-size--1-of-4 slds-m-left--x-large"">
+              <dl>
+                <dt>
+                  <p class=""slds-text-heading--label slds-truncate"" title=""ACCOUNT NAME"">ACCOUNT NAME</p>
+                </dt>
+                <dd>
+                  <p><a class=""accName"" href=""/{!oppObj.accountid}"">{!oppObj.account.name}</a></p>
+                </dd>
+              </dl>
+            </div>
+            <div class=""slds-col--padded slds-size--1-of-4"">
+              <dl>
+                <dt>
+                  <p class=""slds-text-heading--label slds-truncate"" title=""CLOSE DATE"">CLOSE DATE</p>
+                </dt>
+                <dd>
+                  <p class=""slds-text-body--regular closeDate"">{!oppObj.closedate}</p>
+                </dd>
+              </dl>
+            </div>
+            <div class=""slds-col--padded slds-size--1-of-4"">
+              <dl>
+                <dt>
+                  <p class=""slds-text-heading--label slds-truncate"" title="""">AMOUNT</p>
+                </dt>
+                <dd><p class=""slds-text-body--regular oppAmount"">{!oppObj.amount}</p></dd>
+              </dl>
+            </div>
+            <div class=""slds-col--padded slds-size--1-of-4"">
+              <dl>
+                <dt>
+                  <p class=""slds-text-heading--label slds-truncate"" title=""OPPORTUNITY OWNER"">OPPORTUNITY OWNER</p>
+                </dt>
+                <dd>
+                  <p>
+                    <a class=""oppOwner"" href=""/{!oppObj.ownerid}"">{!oppObj.owner.name}</a>
+                  </p>
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>  
+        <!-- record header finish -->
+        <div class=""slds-grid slds-wrap slds-m-left--medium slds-m-top--medium"">
+            <div class=""slds-col--padded slds-size--9-of-12"">
+                <center>
+                    <apex:variable value=""false"" var=""statusGreyFlag""/>
+            
+                    <div class=""slds-tabs--path"" role=""application tablist"">
+                      <ul class=""slds-tabs--path__nav"" role=""presentation"">
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Prospecting','slds-is-current','slds-is-complete'),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""-1"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Prospecting </span>
+                          </a>
+                          
+                        </li>
+                        
+                        <apex:variable value=""{!if(oppObj.StageName == 'Prospecting','true',statusGreyFlag)}"" var=""statusGreyFlag""/>
+                        
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Qualification','slds-is-current',if(statusGreyFlag == 'true','slds-is-incomplete','slds-is-complete')),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""-1"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                              <span class=""slds-assistive-text"">Stage Complete</span>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Qualification</span>
+                          </a>
+                        </li>
+                        
+                        <apex:variable value=""{!if(oppObj.StageName == 'Qualification','true',statusGreyFlag)}"" var=""statusGreyFlag""/>
+                        
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Needs Analysis','slds-is-current',if(statusGreyFlag == 'true','slds-is-incomplete','slds-is-complete')),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""-1"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                              <span class=""slds-assistive-text"">Stage Complete</span>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Needs Analysis</span>
+                          </a>
+                        </li>
+                        
+                        <apex:variable value=""{!if(oppObj.StageName == 'Needs Analysis','true',statusGreyFlag)}"" var=""statusGreyFlag""/>
+                        
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Value Proposition','slds-is-current',if(statusGreyFlag == 'true','slds-is-incomplete','slds-is-complete')),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""0"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Value Proposition</span>
+                          </a>
+                        </li>
+                        
+                        <apex:variable value=""{!if(oppObj.StageName == 'Value Proposition','true',statusGreyFlag)}"" var=""statusGreyFlag""/>
+                        
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Id. Decision Makers','slds-is-current',if(statusGreyFlag == 'true','slds-is-incomplete','slds-is-complete')),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""-1"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Id. Decision Makers</span>
+                          </a>
+                        </li>
+                        
+                        <apex:variable value=""{!if(oppObj.StageName == 'Id. Decision Makers','true',statusGreyFlag)}"" var=""statusGreyFlag""/>
+                        
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Perception Analysis','slds-is-current',if(statusGreyFlag == 'true','slds-is-incomplete','slds-is-complete')),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""-1"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Perception Analysis</span>
+                          </a>
+                        </li>
+                        
+                        <apex:variable value=""{!if(oppObj.StageName == 'Perception Analysis','true',statusGreyFlag)}"" var=""statusGreyFlag""/>
+                        
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Proposal/Price Quote','slds-is-current',if(statusGreyFlag == 'true','slds-is-incomplete','slds-is-complete')),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""-1"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Proposal/Price Quote</span>
+                          </a>
+                        </li>
+                        
+                        <apex:variable value=""{!if(oppObj.StageName == 'Proposal/Price Quote','true',statusGreyFlag)}"" var=""statusGreyFlag""/>
+                        
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Negotiation/Review','slds-is-current',if(statusGreyFlag == 'true','slds-is-incomplete','slds-is-complete')),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""-1"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Negotiation/Review</span>
+                          </a>
+                        </li>
+                        
+                        <apex:variable value=""{!if(oppObj.StageName == 'Negotiation/Review','true',statusGreyFlag)}"" var=""statusGreyFlag""/>
+                        
+                        <li class=""slds-tabs--path__item {!if(statusFlag ,if(oppObj.StageName == 'Closed','slds-is-current',if(statusGreyFlag == 'true','slds-is-incomplete','slds-is-complete')),'slds-is-incomplete')}"" role=""presentation"">
+                          <a class=""slds-tabs--path__link"" aria-selected=""false"" tabindex=""-1"" role=""tab"" href=""#void"" aria-live=""assertive"">
+                            <span class=""slds-tabs--path__stage"">
+                              <svg aria-hidden=""true"" class=""slds-icon slds-icon--x-small"">
+                                <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                              </svg>
+                            </span>
+                            <span class=""slds-tabs--path__title"">Closed</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+        
+                </center>
+            </div>
+            <div class=""slds-col--padded slds-size--3-of-12"">
+                <button class=""slds-button slds-button--brand"" style=""border-radius:20px;height:32px;border:0px;""> 
+                    <svg aria-hidden=""true"" class=""slds-icon slds-icon-text-check slds-icon--x-small"">
+                        <use xlink:href=""{!URLFOR($Resource.slds, 'assets/icons/utility-sprite/svg/symbols.svg#check')}""></use>
+                    </svg>
+                    Mark Stage As Complete
+                </button>
+            </div>
+        </div>
+        
+        <script>
+            
+        </script>
+    </body>
+</html>
+</apex:component>","2016-01-19T13:54:47.000Z","00515000006PjX3AAK","2016-01-21T10:21:16.000Z","00515000006PjX3AAK","2016-01-21T10:21:16.000Z"
+"09915000000b1g1AAA","","SVGComponent","35.0","SVGComponent","","3","core.apexpages.components.cdk.NullController","<apex:component layout=""none"">
+    <apex:attribute name=""styleClass"" type=""String"" description=""Class for svg tag"" />
+    <apex:attribute name=""path"" type=""String"" description=""Path for svg tag"" />
+    <apex:attribute name=""clickOperation"" type=""String"" description=""onclick script"" />
+    <apex:attribute name=""cssStyle"" type=""String"" description=""style"" />
+    <svg aria-hidden=""true"" class=""{!styleClass}"" style=""{!cssStyle}"">
+        <use xmlns:xlink=""http://www.w3.org/1999/xlink"" xlink:href=""{!URLFOR($Resource.slds, path)}"" onclick=""{!clickOperation}""/>
+    </svg>
+</apex:component>","2016-02-04T07:59:20.000Z","00515000006PjX3AAK","2016-05-04T10:03:23.000Z","00515000006PjX3AAK","2016-05-04T10:03:23.000Z"

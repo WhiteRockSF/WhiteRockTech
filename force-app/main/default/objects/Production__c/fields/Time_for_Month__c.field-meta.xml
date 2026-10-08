@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Time_for_Month__c</fullName>
+    <label>Time for Month</label>
+    <summarizedField>SFDC_Service_Timecard__c.Ticket_Time__c</summarizedField>
+    <summaryFilterItems>
+        <field>SFDC_Service_Timecard__c.Current_Month__c</field>
+        <operation>equals</operation>
+        <value>True</value>
+    </summaryFilterItems>
+    <summaryForeignKey>SFDC_Service_Timecard__c.Production__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>

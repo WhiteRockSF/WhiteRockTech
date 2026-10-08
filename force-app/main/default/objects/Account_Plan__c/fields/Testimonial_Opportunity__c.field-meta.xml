@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Testimonial_Opportunity__c</fullName>
+    <defaultValue>false</defaultValue>
+    <inlineHelpText>When this does become a success story then we want to flag this to let marketing know of the change due to the plan and efforts.</inlineHelpText>
+    <label>Testimonial Opportunity?</label>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LinkedIn Ad Sync — Complete User Guide</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --brand: #0a66c2; --brand-dark: #004182; --accent: #ff7a59;
+      --bg: #f4f7fb; --card: #fff; --text: #1b1f23; --muted: #5f6b7a; --border: #e3e8ef;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: "Segoe UI", system-ui, sans-serif; color: var(--text); background: var(--bg); line-height: 1.55; margin: 0; }
+    .hero {
+      background: linear-gradient(135deg, #003d6b 0%, var(--brand) 50%, #378fe9 100%);
+      color: #fff; padding: 2.2rem 2rem 1.8rem;
+    }
+    .hero h1 { margin: 0 0 0.3rem; font-size: 2rem; }
+    .hero p { margin: 0.25rem 0; opacity: 0.95; }
+    .hero .meta { margin-top: 1rem; font-size: 0.88rem; opacity: 0.85; }
+    main { max-width: 960px; margin: 0 auto; padding: 1.25rem 1.25rem 2rem; }
+    section {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.25rem 1.4rem; margin-bottom: 1rem;
+      box-shadow: 0 2px 6px rgba(16,24,40,0.04);
+      /* Do NOT use page-break-inside:avoid on whole sections — large Mermaid SVGs
+         leave blank pages when the browser pushes them to the next sheet. */
+    }
+    h2 { color: var(--brand-dark); font-size: 1.28rem; margin: 0 0 0.75rem; border-bottom: 2px solid var(--border); padding-bottom: 0.4rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 0.45rem; color: #243b53; }
+    h4 { font-size: 0.98rem; margin: 0.75rem 0 0.35rem; color: #486581; }
+    p { margin: 0.45rem 0; }
+    ul, ol { margin: 0.35rem 0 0.6rem 1.15rem; }
+    li { margin: 0.2rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.6rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+    th { background: #eef4fb; color: var(--brand-dark); font-weight: 600; }
+    tr:nth-child(even) td { background: #fafbfc; }
+    code { background: #eef2f7; padding: 0.1rem 0.35rem; border-radius: 4px; font-size: 0.86em; }
+    .diagram {
+      background: #fafcff; border: 1px solid var(--border); border-radius: 10px;
+      padding: 0.65rem; margin: 0.5rem 0; overflow: hidden; max-width: 100%;
+    }
+    .diagram .mermaid { display: flex; justify-content: center; max-width: 100%; }
+    .diagram .mermaid svg { max-width: 100% !important; height: auto !important; max-height: 420px; }
+    .callout { border-left: 4px solid var(--brand); background: #eef6ff; padding: 0.65rem 0.9rem; border-radius: 0 8px 8px 0; margin: 0.6rem 0; font-size: 0.93rem; }
+    .callout.warn { border-color: #b54708; background: #fff8f0; }
+    .callout.ok { border-color: #057647; background: #ecfdf3; }
+    .toc { columns: 2; column-gap: 1.5rem; font-size: 0.92rem; }
+    .toc li { break-inside: avoid; }
+    .toc a { color: var(--brand); text-decoration: none; }
+    .steps { counter-reset: step; list-style: none; margin-left: 0; padding-left: 0; }
+    .steps li { counter-increment: step; position: relative; padding-left: 2.2rem; margin: 0.5rem 0; }
+    .steps li::before {
+      content: counter(step); position: absolute; left: 0; top: 0.05rem;
+      width: 1.55rem; height: 1.55rem; background: var(--brand); color: #fff;
+      border-radius: 50%; text-align: center; line-height: 1.55rem; font-size: 0.82rem; font-weight: 700;
+    }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } .toc { columns: 1; } }
+    footer { text-align: center; color: var(--muted); font-size: 0.82rem; padding: 1rem; }
+    @media print {
+      body { background: #fff; }
+      section { box-shadow: none; break-inside: auto; page-break-inside: auto; }
+      .diagram { break-inside: auto; page-break-inside: auto; }
+      h2, h3, table, .callout { break-inside: avoid; page-break-inside: avoid; }
+      .hero { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <h1>LinkedIn Ad Metrics → HubSpot</h1>
+    <p><strong>Complete User Guide</strong> — setup, sync, batch jobs, and troubleshooting</p>
+    <p class="meta">WhiteRock Tech · Salesforce LinkedIn Ad Sync · Professional demographics (Company Name Segment)</p>
+  </header>
+
+  <main>
+    <section id="toc">
+      <h2>Table of contents</h2>
+      <ol class="toc">
+        <li><a href="#overview">1. Overview &amp; architecture</a></li>
+        <li><a href="#concepts">2. Key concepts</a></li>
+        <li><a href="#access">3. Access &amp; prerequisites</a></li>
+        <li><a href="#initial">4. Initial setup (first time)</a></li>
+        <li><a href="#sync">5. Sync tab (manual import)</a></li>
+        <li><a href="#api">6. API Settings tab</a></li>
+        <li><a href="#batch">7. HubSpot batch sync</a></li>
+        <li><a href="#schedule">8. Daily auto-sync &amp; scheduler</a></li>
+        <li><a href="#metadata">9. Custom Metadata configuration</a></li>
+        <li><a href="#monitor">10. Monitoring &amp; logs</a></li>
+        <li><a href="#troubleshoot">11. Troubleshooting</a></li>
+        <li><a href="#faq">12. FAQ</a></li>
+        <li><a href="#checklist">13. Full setup checklist</a></li>
+      </ol>
+    </section>
+
+    <section id="overview">
+      <h2>1. Overview &amp; architecture</h2>
+      <p>
+        The <strong>LinkedIn Ad Sync</strong> Lightning component imports company-level ad metrics from LinkedIn
+        (Professional demographics / Company Name Segment), stores them in Salesforce, and pushes updates to
+        <strong>HubSpot Companies</strong> via an Apex batch job.
+      </p>
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart TB
+    subgraph LinkedIn
+        CM[Campaign Manager]
+        API[LinkedIn REST API]
+        CM -->|CSV export| CSV[CSV file]
+        CM --> API
+    end
+    subgraph Salesforce
+        LWC[LinkedIn Ad Sync LWC]
+        MET[(LinkedIn Ad Metric)]
+        SET[Integration Settings]
+        SCH[LinkedInAdSyncScheduler]
+        BAT[LinkedInAdMetricHubSpotBatch]
+        LWC --> MET
+        SET --> LWC
+        SCH -->|daily fetch| API
+        SCH --> MET
+        SCH --> BAT
+        LWC -->|manual fetch| API
+        LWC -->|Push to HubSpot| BAT
+    end
+    subgraph HubSpot
+        CO[Companies - match by name]
+    end
+    CSV --> LWC
+    API --> LWC
+    BAT --> CO
+        </pre>
+      </div>
+      <div class="callout ok">
+        <strong>Design principle:</strong> Salesforce is the staging layer. HubSpot is updated only after data is stored locally.
+        Companies are matched by <strong>exact name</strong> — HubSpot does not auto-create records.
+      </div>
+    </section>
+
+    <section id="concepts">
+      <h2>2. Key concepts</h2>
+      <table>
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td><strong>LinkedIn Ad Metric</strong></td><td>Salesforce record: one row per Campaign + Company with impressions, clicks, conversions</td></tr>
+        <tr><td><strong>Sync key</strong></td><td>Unique key = Campaign Name + Company Name (case-insensitive). Updates overwrite duplicates</td></tr>
+        <tr><td><strong>Source</strong></td><td><code>CSV Upload</code> or <code>LinkedIn API</code></td></tr>
+        <tr><td><strong>HubSpot Status</strong></td><td><code>Pending</code>, <code>Synced</code>, <code>Skipped</code>, or <code>Failed</code></td></tr>
+        <tr><td><strong>Manual batch</strong></td><td>User clicks <strong>Push to HubSpot (Batch)</strong> on Sync tab</td></tr>
+        <tr><td><strong>Scheduled job</strong></td><td>Daily Apex scheduler: LinkedIn fetch → then HubSpot batch for all pending rows</td></tr>
+        <tr><td><strong>Lookback days</strong></td><td>How many days back the scheduler fetches from LinkedIn (default 30)</td></tr>
+      </table>
+    </section>
+
+    <section id="access">
+      <h2>3. Access &amp; prerequisites</h2>
+      <h3>Salesforce</h3>
+      <ul>
+        <li>Tab <strong>LinkedIn Ad Sync</strong> (or app containing the component)</li>
+        <li>Read/write on <code>LinkedIn_Ad_Metric__c</code> and org Custom Settings</li>
+      </ul>
+      <h3>LinkedIn</h3>
+      <ul>
+        <li>Marketing / Advertising API access with ad analytics reporting scopes</li>
+        <li>Access token (long tokens use secure store via <strong>Use LinkedIn Named Credential</strong>)</li>
+        <li>Optional: Refresh token + Client Id/Secret for automatic token renewal</li>
+        <li>Ad Account URN, e.g. <code>urn:li:sponsoredAccount:506515554</code></li>
+      </ul>
+      <h3>HubSpot</h3>
+      <ul>
+        <li>Private App token with Companies read/write</li>
+        <li>Custom company properties for LinkedIn metrics (see section 9)</li>
+      </ul>
+    </section>
+
+    <section id="initial">
+      <h2>4. Initial setup (first time)</h2>
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart LR
+    A[API Settings] --> B[Test LinkedIn]
+    A --> C[Test HubSpot]
+    B --> D[Sync tab defaults]
+    D --> E[Fetch or CSV]
+    E --> F[Push to HubSpot]
+    F --> G[Optional: Schedule Daily Job]
+        </pre>
+      </div>
+      <ol class="steps">
+        <li>Open <strong>LinkedIn Ad Sync</strong> → <strong>API Settings</strong></li>
+        <li>Enter LinkedIn Access Token, Ad Account URN, API version (default <code>202607</code>)</li>
+        <li>Enter HubSpot Access Token (or enable Named Credential)</li>
+        <li>Click <strong>Save Settings</strong></li>
+        <li>Click <strong>Test LinkedIn</strong> and <strong>Test HubSpot</strong> — both should return SUCCESS</li>
+        <li>Go to <strong>Sync</strong> → enter Campaign Name + Campaign Id → <strong>Save Sync Defaults</strong></li>
+        <li>Run first import (CSV or Fetch) → <strong>Push to HubSpot (Batch)</strong></li>
+      </ol>
+    </section>
+
+    <section id="sync">
+      <h2>5. Sync tab — manual import</h2>
+      <h3>Campaign fields</h3>
+      <table>
+        <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+        <tr><td>Campaign Name</td><td>Yes</td><td>Exact name from Campaign Manager / ad set</td></tr>
+        <tr><td>LinkedIn Campaign Id</td><td>For API</td><td>Numeric id from URL <code>campaignIds=[704412604]</code></td></tr>
+        <tr><td>Report Start</td><td>No</td><td>API date range start</td></tr>
+        <tr><td>Report End</td><td>No</td><td>API date range end. <strong>Empty = always today</strong></td></tr>
+      </table>
+      <div class="callout">
+        <strong>Campaign Id vs Campaign Group Id:</strong> Use the <strong>ad set / campaign id</strong> from
+        <code>campaignIds=[...]</code>, not the campaign group id (<code>campaignGroupIds</code>).
+      </div>
+      <h3>Option A — CSV upload</h3>
+      <ol>
+        <li>Campaign Manager → Export → Report type: <strong>Professional demographics</strong></li>
+        <li>Enter Campaign Name, choose CSV file</li>
+        <li>Parser reads <strong>Company Name Segment</strong> rows only</li>
+      </ol>
+      <h3>Option B — LinkedIn API fetch</h3>
+      <div class="diagram">
+        <pre class="mermaid">
+sequenceDiagram
+    participant UI as Sync UI
+    participant Apex as DemographicsApiService
+    participant LI as LinkedIn API
+    participant SF as LinkedIn Ad Metric
+    UI->>Apex: Fetch from LinkedIn
+    Apex->>LI: adAnalytics MEMBER_COMPANY
+    LI-->>Apex: elements with org ids
+    Apex->>LI: organizationsLookup
+    LI-->>Apex: company names
+    Apex->>SF: upsert metrics
+    Apex-->>UI: toast N rows, names resolved
+        </pre>
+      </div>
+      <p><strong>Toast examples:</strong></p>
+      <ul>
+        <li><code>LinkedIn: 97 rows</code> — data received</li>
+        <li><code>Company names resolved: 97/97</code> — ids converted to names</li>
+        <li><code>LinkedIn: 0 rows</code> — empty API response (check id / dates)</li>
+      </ul>
+      <h3>Save Sync Defaults</h3>
+      <p>Persists campaign name, id, and report dates. Empty Report End is saved as “use today on every fetch”.</p>
+      <h3>Stored metrics table</h3>
+      <table>
+        <tr><th>Column</th><th>Description</th></tr>
+        <tr><td>Company</td><td>Company name (after API lookup)</td></tr>
+        <tr><td>Impressions / Clicks / Conversions</td><td>Metric values</td></tr>
+        <tr><td>HubSpot Status / Error</td><td>Last sync result</td></tr>
+        <tr><td>Source</td><td>CSV Upload or LinkedIn API</td></tr>
+      </table>
+    </section>
+
+    <section id="api">
+      <h2>6. API Settings tab</h2>
+      <div class="grid2">
+        <div>
+          <h3>LinkedIn settings</h3>
+          <ul>
+            <li><strong>Access Token</strong></li>
+            <li><strong>Refresh Token</strong>, Client Id, Secret (optional)</li>
+            <li><strong>Use LinkedIn Named Credential</strong> — required for tokens &gt; 255 chars</li>
+            <li><strong>LinkedIn Ad Account URN</strong></li>
+            <li><strong>LinkedIn API Version</strong></li>
+            <li><strong>Default Campaign Name / Id</strong></li>
+          </ul>
+        </div>
+        <div>
+          <h3>HubSpot settings</h3>
+          <ul>
+            <li><strong>HubSpot Access Token</strong></li>
+            <li><strong>Use HubSpot Named Credential</strong></li>
+            <li><strong>HubSpot Batch Size</strong> (default 50)</li>
+          </ul>
+        </div>
+      </div>
+      <h3>Action buttons</h3>
+      <table>
+        <tr><th>Button</th><th>Action</th></tr>
+        <tr><td>Save Settings</td><td>Persist all API Settings fields</td></tr>
+        <tr><td>Test LinkedIn</td><td>Call adAccounts API — verifies token</td></tr>
+        <tr><td>Refresh LinkedIn Token</td><td>OAuth refresh using stored credentials</td></tr>
+        <tr><td>Test HubSpot</td><td>Call HubSpot Companies API — verifies token</td></tr>
+      </table>
+    </section>
+
+    <section id="batch">
+      <h2>7. HubSpot batch sync</h2>
+      <p>
+        The batch job <code>LinkedInAdMetricHubSpotBatch</code> syncs staged Salesforce records to HubSpot.
+        It processes rows where <strong>HubSpot Sync Status</strong> is <code>Pending</code> or <code>Failed</code>.
+      </p>
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart LR
+    A[Pending/Failed rows] --> B[Match HubSpot by name]
+    B -->|Found| C[Update metrics]
+    B -->|Not found| D[Skipped]
+    C -->|OK| E[Synced]
+    C -->|Error| F[Failed]
+        </pre>
+      </div>
+      <h3>Manual batch (Sync tab)</h3>
+      <ol class="steps">
+        <li>Ensure metrics exist in <strong>Stored metrics</strong></li>
+        <li>Click <strong>Push to HubSpot (Batch)</strong></li>
+        <li>Batch job Id appears in toast; status shows below buttons</li>
+        <li>When complete, refresh table — check HubSpot Status column</li>
+      </ol>
+      <div class="callout">
+        Manual batch filters by the <strong>Campaign Name</strong> currently entered on Sync tab (if set).
+        Only <code>Pending</code> and <code>Failed</code> rows for that campaign are processed.
+      </div>
+      <h3>HubSpot properties updated</h3>
+      <p>Mapped via Custom Metadata <strong>LinkedIn HubSpot Config → Default</strong>:</p>
+      <table>
+        <tr><th>Metric</th><th>Default HubSpot property</th></tr>
+        <tr><td>Impressions</td><td><code>linkedin_impressions</code></td></tr>
+        <tr><td>Clicks</td><td><code>linkedin_clicks</code></td></tr>
+        <tr><td>Conversions</td><td><code>linkedin_conversions</code></td></tr>
+        <tr><td>Campaign name</td><td><code>linkedin_campaign_name</code></td></tr>
+      </table>
+      <h3>Batch size</h3>
+      <p>
+        <strong>HubSpot Batch Size</strong> in API Settings controls how many records each batch chunk processes
+        (default <strong>50</strong>). Lower if hitting HubSpot rate limits; higher for faster runs on large datasets.
+      </p>
+      <h3>Status reference</h3>
+      <table>
+        <tr><th>Status</th><th>Meaning</th><th>Action</th></tr>
+        <tr><td>Pending</td><td>Not yet synced or re-queued</td><td>Run Push to HubSpot</td></tr>
+        <tr><td>Synced</td><td>HubSpot Company updated</td><td>None</td></tr>
+        <tr><td>Skipped</td><td>No HubSpot Company with exact name</td><td>Create/rename in HubSpot</td></tr>
+        <tr><td>Failed</td><td>API or property error</td><td>Read HubSpot Error column</td></tr>
+      </table>
+    </section>
+
+    <section id="schedule">
+      <h2>8. Daily auto-sync &amp; scheduler</h2>
+      <p>
+        The scheduled Apex class <code>LinkedInAdSyncScheduler</code> (job name:
+        <strong>LinkedIn Ad Sync Daily</strong>) runs automatically when configured from API Settings.
+      </p>
+      <div class="diagram">
+        <pre class="mermaid">
+flowchart TD
+    T[Daily cron trigger] --> C{Auto Sync Enabled?}
+    C -->|No| X[Exit]
+    C -->|Yes| D[LinkedIn token OK?]
+    D -->|No| X
+    D -->|Yes| E[Build date range today minus lookback]
+    E --> F[Resolve campaign list]
+    F --> G[For each campaign: LinkedIn API fetch]
+    G --> H[Upsert LinkedIn Ad Metric]
+    H --> I[Start HubSpot batch all Pending/Failed]
+        </pre>
+      </div>
+      <h3>Configure from UI (recommended)</h3>
+      <ol class="steps">
+        <li>API Settings → enable <strong>Auto Sync Enabled</strong></li>
+        <li>Set <strong>Auto Sync Lookback Days</strong> (e.g. 30)</li>
+        <li>Set <strong>Daily run hour</strong> (0–23, Salesforce org timezone)</li>
+        <li>Set <strong>Default Campaign Name</strong> and <strong>Default LinkedIn Campaign Id</strong></li>
+        <li>Click <strong>Save Settings</strong></li>
+        <li>Click <strong>Schedule Daily Job</strong></li>
+      </ol>
+      <p>The schedule panel shows:</p>
+      <ul>
+        <li><strong>Job: Active / Not scheduled</strong></li>
+        <li><strong>Next fire time</strong></li>
+        <li><strong>Campaigns</strong> — list used by the job</li>
+      </ul>
+      <div class="callout warn">
+        <strong>Auto Sync Enabled must be ON</strong> or the scheduler exits immediately even if cron is active.
+        <strong>Stop Daily Job</strong> aborts the cron and disables Auto Sync.
+      </div>
+      <h3>Campaign sources for scheduler</h3>
+      <p>The job fetches metrics for:</p>
+      <ol>
+        <li>All active records in Custom Metadata <strong>LinkedIn Scheduled Campaign</strong></li>
+        <li>Plus <strong>Default Campaign Name / Id</strong> from Integration Settings (if not duplicate)</li>
+      </ol>
+      <h3>Date range used by scheduler</h3>
+      <table>
+        <tr><th>Setting</th><th>Effect</th></tr>
+        <tr><td>Auto Sync Lookback Days</td><td>Start = today − N days; End = today</td></tr>
+        <tr><td>Report Start/End on Sync tab</td><td>Used for <strong>manual</strong> fetch only, not scheduler</td></tr>
+      </table>
+      <h3>Alternative: Setup → Schedule Apex</h3>
+      <p>Admins can also schedule manually:</p>
+      <p><code>Setup → Apex Classes → LinkedInAdSyncScheduler → Schedule Apex</code></p>
+      <p>Daily at 6:00 AM cron: <code>0 0 6 * * ?</code></p>
+      <p>Prefer the UI buttons — they manage the job name and settings consistently.</p>
+      <h3>Manual vs scheduled batch comparison</h3>
+      <table>
+        <tr><th></th><th>Manual Push to HubSpot</th><th>Daily scheduler</th></tr>
+        <tr><td>Trigger</td><td>User button</td><td>Cron + Auto Sync Enabled</td></tr>
+        <tr><td>LinkedIn fetch</td><td>User runs Fetch separately</td><td>Automatic before batch</td></tr>
+        <tr><td>Batch scope</td><td>Current campaign filter (if set)</td><td>All Pending/Failed rows</td></tr>
+        <tr><td>Date range</td><td>Sync tab Report Start/End</td><td>Lookback days → today</td></tr>
+      </table>
+    </section>
+
+    <section id="metadata">
+      <h2>9. Custom Metadata configuration</h2>
+      <h3>LinkedIn HubSpot Config (Default)</h3>
+      <p><code>Setup → Custom Metadata Types → LinkedIn HubSpot Config → Manage Records → Default</code></p>
+      <table>
+        <tr><th>Field</th><th>Default value</th></tr>
+        <tr><td>HubSpot Target Type</td><td>Companies</td></tr>
+        <tr><td>HubSpot Property Impressions</td><td>linkedin_impressions</td></tr>
+        <tr><td>HubSpot Property Clicks</td><td>linkedin_clicks</td></tr>
+        <tr><td>HubSpot Property Conversions</td><td>linkedin_conversions</td></tr>
+        <tr><td>HubSpot Property Campaign</td><td>linkedin_campaign_name</td></tr>
+      </table>
+      <div class="callout warn">
+        These properties must exist on HubSpot Companies before sync succeeds.
+        Create them in HubSpot or use the setup script with Private App scope <code>crm.schemas.companies.write</code>.
+      </div>
+      <h3>LinkedIn Scheduled Campaign</h3>
+      <p>For multiple campaigns in the daily job, add CMDT records:</p>
+      <p><code>Setup → Custom Metadata Types → LinkedIn Scheduled Campaign → New</code></p>
+      <table>
+        <tr><th>Field</th><th>Example</th></tr>
+        <tr><td>Campaign Name</td><td>May 26 CTO Peer Perspective</td></tr>
+        <tr><td>LinkedIn Campaign Id</td><td>704412604</td></tr>
+        <tr><td>Active</td><td>checked</td></tr>
+      </table>
+    </section>
+
+    <section id="monitor">
+      <h2>10. Monitoring &amp; logs</h2>
+      <h3>In the UI</h3>
+      <ul>
+        <li><strong>Stored metrics</strong> — HubSpot Status / Error per row</li>
+        <li><strong>Batch status line</strong> — after manual Push (Processed/Total)</li>
+        <li><strong>Schedule panel</strong> — Active, Next fire, campaign list</li>
+        <li><strong>Fetch toast</strong> — row count and name resolution</li>
+      </ul>
+      <h3>In Salesforce Setup</h3>
+      <ul>
+        <li><strong>Setup → Apex Jobs</strong> — monitor <code>LinkedInAdMetricHubSpotBatch</code></li>
+        <li><strong>Setup → Scheduled Jobs</strong> — verify <code>LinkedIn Ad Sync Daily</code></li>
+        <li><strong>Debug Logs</strong> — filter on fetch / scheduler / batch Apex classes</li>
+      </ul>
+      <h3>What to look for in logs</h3>
+      <table>
+        <tr><th>Log pattern</th><th>Meaning</th></tr>
+        <tr><td><code>adAnalytics ... StatusCode=200</code></td><td>LinkedIn metrics fetched</td></tr>
+        <tr><td><code>elements: []</code></td><td>Empty period — no company rows</td></tr>
+        <tr><td><code>organizationsLookup HTTP 400</code></td><td>Name lookup failed — ids stay numeric</td></tr>
+        <tr><td><code>Resolved N/N company names</code></td><td>Name lookup succeeded</td></tr>
+        <tr><td><code>PROPERTY_DOESNT_EXIST</code></td><td>Missing HubSpot company property</td></tr>
+      </table>
+    </section>
+
+    <section id="troubleshoot">
+      <h2>11. Troubleshooting</h2>
+      <table>
+        <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+        <tr><td>Fetch OK, 0 rows</td><td>Wrong campaign id or empty date range</td><td>Verify <code>campaignIds</code> in URL; widen dates</td></tr>
+        <tr><td>Company shows numeric id</td><td>organizationsLookup failed</td><td>Re-fetch; check token scopes</td></tr>
+        <tr><td>HubSpot Skipped</td><td>Company name mismatch</td><td>Match HubSpot Company name exactly</td></tr>
+        <tr><td>HubSpot Failed</td><td>Missing property</td><td>Create HubSpot custom properties</td></tr>
+        <tr><td>Scheduler does nothing</td><td>Auto Sync off or no campaigns</td><td>Enable Auto Sync; set defaults or CMDT</td></tr>
+        <tr><td>LinkedIn 403 ACCESS_DENIED</td><td>Missing ad reporting scope</td><td>Update LinkedIn app scopes; use CSV path</td></tr>
+        <tr><td>Test LinkedIn 401</td><td>Expired token</td><td>Refresh token or paste new access token</td></tr>
+        <tr><td>Report End won't stay empty</td><td>Old saved default</td><td>Clear → Save Sync Defaults</td></tr>
+      </table>
+    </section>
+
+    <section id="faq">
+      <h2>12. FAQ</h2>
+      <p><strong>Do we use Campaign Group id?</strong><br/>No. Use campaign/ad set id from <code>campaignIds=[704412604]</code>.</p>
+      <p><strong>Does scheduler use Sync tab dates?</strong><br/>No. It uses lookback days ending today.</p>
+      <p><strong>Will HubSpot create new companies?</strong><br/>No. Only existing companies with exact name match are updated.</p>
+      <p><strong>Can I sync one campaign manually?</strong><br/>Yes — set Campaign Name on Sync tab, then Push to HubSpot.</p>
+      <p><strong>What happens to Failed rows?</strong><br/>They are included in the next batch run (manual or scheduled).</p>
+    </section>
+
+    <section id="checklist">
+      <h2>13. Full setup checklist</h2>
+      <h3>One-time admin</h3>
+      <ul class="steps">
+        <li>Create HubSpot company properties (impressions, clicks, conversions, campaign)</li>
+        <li>Verify LinkedIn HubSpot Config CMDT mapping</li>
+        <li>Add LinkedIn Scheduled Campaign CMDT records (if multiple campaigns)</li>
+        <li>Configure Remote Site / Named Credentials (if used)</li>
+      </ul>
+      <h3>Per-environment setup</h3>
+      <ul class="steps">
+        <li>API Settings: LinkedIn token + URN + HubSpot token → Save → Test both</li>
+        <li>Sync: Campaign Name + Id → Save Sync Defaults</li>
+        <li>Test Fetch or CSV import</li>
+        <li>Push to HubSpot (Batch) — verify Synced status</li>
+        <li>Enable Auto Sync, set lookback + hour → Schedule Daily Job</li>
+        <li>Confirm Next fire time in schedule panel</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>WhiteRock Tech · LinkedIn Ad Sync — Complete User Guide · Generated for end users and admins</footer>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        primaryColor: '#eef6ff', primaryTextColor: '#1b1f23', primaryBorderColor: '#0a66c2',
+        lineColor: '#5f6b7a', secondaryColor: '#f4f7fb', tertiaryColor: '#ffffff',
+        fontFamily: 'Segoe UI, system-ui, sans-serif',
+        fontSize: '14px'
+      },
+      flowchart: { curve: 'basis', padding: 8, useMaxWidth: true },
+      sequence: { actorMargin: 28, useMaxWidth: true }
+    });
+  </script>
+</body>
+</html>

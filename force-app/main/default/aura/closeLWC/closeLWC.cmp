@@ -1,0 +1,11 @@
+<aura:component
+    implements="flexipage:availableForRecordHome,force:hasRecordId,force:appHostable,force:lightningQuickActionWithoutHeader"
+    access="global">
+    <!-- <aura:html tag="style">             
+        .slds-modal__container{        
+        width: 100% !important;
+        max-width: 98% !important;
+        }        
+    </aura:html> -->
+    <c:closeCase recordId="{!v.recordId}" onclose="{!c.closeQA}"/>
+</aura:component>

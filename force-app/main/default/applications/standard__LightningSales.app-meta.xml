@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0070D2</headerColor>
+        <logo>WhiteRockcropped_out_white_backgrou</logo>
+        <logoVersion>1</logoVersion>
+        <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
+    </brand>
+    <description>Manage your sales process with accounts, leads, opportunities, and more</description>
+    <formFactors>Small</formFactors>
+    <formFactors>Medium</formFactors>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>WhiteRock</label>
+    <navType>Standard</navType>
+    <tabs>standard-home</tabs>
+    <tabs>standard-Lead</tabs>
+    <tabs>standard-Account</tabs>
+    <tabs>Account_Plan__c</tabs>
+    <tabs>Credential__c</tabs>
+    <tabs>standard-Contact</tabs>
+    <tabs>standard-Pricebook2</tabs>
+    <tabs>standard-Product2</tabs>
+    <tabs>standard-Opportunity</tabs>
+    <tabs>standard-Order</tabs>
+    <tabs>TASKRAY__TaskRay</tabs>
+    <tabs>Production__c</tabs>
+    <tabs>standard-Case</tabs>
+    <tabs>SFDC_Service_Timecard__c</tabs>
+    <tabs>standard-Task</tabs>
+    <tabs>standard-Dashboard</tabs>
+    <tabs>standard-report</tabs>
+    <tabs>Tips_Tricks__c</tabs>
+    <tabs>Projected_Time__c</tabs>
+    <tabs>Delivery_Map</tabs>
+    <uiType>Lightning</uiType>
+    <utilityBar>White_Rock_UtilityBar</utilityBar>
+</CustomApplication>

@@ -1,0 +1,58 @@
+<template>
+    <lightning-card title="HubSpot Visitor Intent" icon-name="standard:marketing_actions">
+        <div slot="actions">
+            <lightning-button 
+                label="Refresh" 
+                icon-name="utility:refresh" 
+                onclick={handleRefresh}
+                disabled={isLoading}>
+            </lightning-button>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </template>
+
+            <template if:true={hasData}>
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                        <div class="slds-text-title slds-m-bottom_xx-small">Page Views</div>
+                        <div class="slds-text-heading_large">{visitorData.pageViews}</div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                        <div class="slds-text-title slds-m-bottom_xx-small">Unique Visitors</div>
+                        <div class="slds-text-heading_large">{visitorData.uniqueVisitors}</div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                        <div class="slds-text-title slds-m-bottom_xx-small">Last Visit</div>
+                        <div class="slds-text-body_regular">{lastVisitFormatted}</div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                        <div class="slds-text-title slds-m-bottom_xx-small">Industry</div>
+                        <div class="slds-text-body_regular">{visitorData.industry}</div>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1">
+                        <div class="slds-text-title slds-m-bottom_xx-small">Company Website</div>
+                        <a href={visitorData.companyUrl} target="_blank" class="slds-text-link">{visitorData.companyUrl}</a>
+                    </div>
+                </div>
+            </template>
+
+            <template if:false={hasData}>
+                <template if:false={isLoading}>
+                    <div class="slds-text-align_center slds-text-color_weak slds-p-vertical_large">
+                        <lightning-icon icon-name="utility:info" size="small"></lightning-icon>
+                        <p class="slds-m-top_small">No visitor intent data found for this {objectApiName}</p>
+                    </div>
+                </template>
+            </template>
+
+            <template if:true={error}>
+                <div class="slds-text-color_error slds-text-align_center">
+                    Error loading data
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

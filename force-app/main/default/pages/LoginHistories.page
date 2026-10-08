@@ -1,0 +1,53 @@
+<apex:page standardController="Contact" extensions="LoginHistoriesController">
+    <apex:slds />
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_1-of-4">
+            <div class="slds-text-heading_small "> Last login</div>
+        </div>
+        <div class="slds-col slds-size_1-of-2">
+            <div class="slds-text-heading_small">
+                <apex:outputText value="{0, date, MMMM d','  yyyy}">
+                    <apex:param value="{!lastLoginDate}" />
+                </apex:outputText>
+            </div>
+
+        </div>
+        <!-- <div class="slds-col slds-size_1-of-4">
+
+        </div>
+        <div class="slds-col slds-size_1-of-4">
+
+        </div> -->
+    </div>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_1-of-2">
+            <div class="slds-text-heading_small"> Total logins</div>
+        </div>
+        <div class="slds-col slds-size_1-of-2">
+            <div class="slds-text-heading_small">{!totalLogin}</div>
+        </div>
+        <!-- <div class="slds-col slds-size_1-of-4"> -->
+            <!-- <div class="slds-text-heading_small"> Orders placed by contact</div>
+        </div>
+        <div class="slds-col slds-size_1-of-4">
+            <div class="slds-text-heading_small">{!totalOrders}</div>
+        </div> -->
+    </div>
+    <div class="slds-grid slds-wrap">
+        <div class="slds-col slds-size_1-of-2">
+            <div class="slds-text-heading_small"> Total logins last 30 days</div>
+        </div>
+        <div class="slds-col slds-size_1-of-2">
+            <div class="slds-text-heading_small">{!totalLogin30}</div>
+        </div>
+       
+        <!-- <div class="slds-col slds-size_1-of-4">
+            <div class="slds-text-heading_small">Orders placed by contacts last 30 days</div>
+        </div>
+        <div class="slds-col slds-size_1-of-4">
+            <div class="slds-text-heading_small"> {!totalOrders30} </div>
+        </div> -->
+    </div>
+
+
+</apex:page>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <decisions>
+        <name>Check_Campaign_ID</name>
+        <label>Check Campaign ID</label>
+        <locationX>710</locationX>
+        <locationY>431</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Campaign_ID_351185444</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Leads.LI_Campaign__c</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>351185444</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Update_Campaign_Name</targetReference>
+            </connector>
+            <label>Campaign ID 351185444</label>
+        </rules>
+        <rules>
+            <name>Campaign_ID_354866374</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Leads.LI_Campaign__c</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>354866374</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Update_Feb_2025_Lead_Generation_Nonprofits</targetReference>
+            </connector>
+            <label>Campaign ID 354866374</label>
+        </rules>
+        <rules>
+            <name>Campaign_ID_362784984</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Leads.Campaign__c</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>urn:li:sponsoredCampaign:362784984</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>March_2025_Lead_Generation_Nonprofits</targetReference>
+            </connector>
+            <label>Campaign ID 362784984</label>
+        </rules>
+        <rules>
+            <name>Campaign_ID_372305674</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Leads.Campaign__c</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>372305674</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>April_2025_NP_Messaging_Lead_Gen</targetReference>
+            </connector>
+            <label>Campaign ID 372305674</label>
+        </rules>
+        <rules>
+            <name>Campaign_ID_372722354</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Leads.Campaign__c</leftValueReference>
+                <operator>Contains</operator>
+                <rightValue>
+                    <stringValue>372722354</stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>April_2025_NP_Doc_Lead_Gen</targetReference>
+            </connector>
+            <label>Campaign ID 372722354</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>Extracted_Campaign_ID</name>
+        <dataType>String</dataType>
+        <expression>LEFT(MID($Record.Campaign__c, FIND(&quot;sponsoredCampaign:&quot;, $Record.Campaign__c) + 18, LEN($Record.Campaign__c)), FIND(&quot; &quot;, MID($Record.Campaign__c, FIND(&quot;sponsoredCampaign:&quot;, $Record.Campaign__c) + 18, LEN($Record.Campaign__c)) &amp; &quot; &quot;) - 1)</expression>
+    </formulas>
+    <formulas>
+        <name>Extraction</name>
+        <dataType>String</dataType>
+        <expression>LEFT(MID($Record.Campaign__c, FIND(&quot;sponsoredCampaign:&quot;, $Record.Campaign__c) + 18, LEN($Record.Campaign__c)), FIND(&quot; &quot;, MID($Record.Campaign__c, FIND(&quot;sponsoredCampaign:&quot;, $Record.Campaign__c) + 18, LEN($Record.Campaign__c)) &amp; &quot; &quot;) - 1)</expression>
+    </formulas>
+    <interviewLabel>January 2025 Lead Generation - 7DS {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>LinkedIn Campaign ID-to-Campaign Name</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Leads</name>
+        <label>Get Leads</label>
+        <locationX>710</locationX>
+        <locationY>323</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Check_Campaign_ID</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Lead</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordUpdates>
+        <name>April_2025_NP_Doc_Lead_Gen</name>
+        <label>April 2025 NP Doc Lead Gen</label>
+        <locationX>1106</locationX>
+        <locationY>539</locationY>
+        <inputAssignments>
+            <field>LI_Campaign__c</field>
+            <value>
+                <stringValue>April 2025 NP Doc Lead Gen</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <recordUpdates>
+        <name>April_2025_NP_Messaging_Lead_Gen</name>
+        <label>April 2025 NP Messaging Lead Gen</label>
+        <locationX>842</locationX>
+        <locationY>539</locationY>
+        <inputAssignments>
+            <field>LI_Campaign__c</field>
+            <value>
+                <stringValue>April 2025 NP Messaging Lead Gen</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <recordUpdates>
+        <name>March_2025_Lead_Generation_Nonprofits</name>
+        <label>March 2025 Lead Generation - Nonprofits</label>
+        <locationX>578</locationX>
+        <locationY>539</locationY>
+        <inputAssignments>
+            <field>LI_Campaign__c</field>
+            <value>
+                <stringValue>March 2025 Lead Generation - Nonprofits</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <recordUpdates>
+        <name>Update_Campaign_Name</name>
+        <label>Update January 2025 Lead Generation - 7DS</label>
+        <locationX>50</locationX>
+        <locationY>539</locationY>
+        <inputAssignments>
+            <field>LI_Campaign__c</field>
+            <value>
+                <stringValue>January 2025 Lead Generation - 7DS</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <recordUpdates>
+        <name>Update_Feb_2025_Lead_Generation_Nonprofits</name>
+        <label>Update Feb 2025 Lead Generation - Nonprofits</label>
+        <locationX>314</locationX>
+        <locationY>539</locationY>
+        <inputAssignments>
+            <field>LI_Campaign__c</field>
+            <value>
+                <stringValue>Feb 2025 Lead Generation - Nonprofits</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>584</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Leads</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Campaign__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
+        <object>Lead</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>CampaignExtraction</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>MappedCampaignName</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>

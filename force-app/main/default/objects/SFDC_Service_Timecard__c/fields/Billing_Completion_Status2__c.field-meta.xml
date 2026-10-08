@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Billing_Completion_Status2__c</fullName>
+    <externalId>false</externalId>
+    <formula>IF( Posted__c = TRUE,&quot;Billed Against Contract&quot;,IF( ISBLANK( Production__c ), IF( Case__r.Case_Billing_Status2__c  = &quot;Billable&quot;,&quot;Work In Process - Not Billed Currently&quot;,IF( Case__r.Case_Billing_Status2__c =&quot;Maintenance Contract&quot;,&quot;Managed Service Agreement Work&quot;,&quot;&quot;)),&quot;Work In Process - Not Billed Currently&quot;))</formula>
+    <inlineHelpText>New field that autofills</inlineHelpText>
+    <label>Billing Completion Status</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>

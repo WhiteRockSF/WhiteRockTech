@@ -1,0 +1,559 @@
+"ID","NAMESPACEPREFIX","NAME","TABLEENUMORID","USAGEBEFOREINSERT","USAGEAFTERINSERT","USAGEBEFOREUPDATE","USAGEAFTERUPDATE","USAGEBEFOREDELETE","USAGEAFTERDELETE","USAGEISBULK","USAGEAFTERUNDELETE","APIVERSION","STATUS","ISVALID","BODYCRC","BODY","LENGTHWITHOUTCOMMENTS","CREATEDDATE","CREATEDBYID","LASTMODIFIEDDATE","LASTMODIFIEDBYID","SYSTEMMODSTAMP"
+"01q15000001UqpaAAC","","UpdateIdToNameTrigger","PbxStage__c","false","true","false","false","false","false","true","false","36.0","Active","false","2.843885679E9","trigger UpdateIdToNameTrigger on PbxStage__c (after insert) {
+    List<PbxStage__c>updateList = new List<PbxStage__c>();
+    
+    for(PbxStage__c obj : trigger.new){
+        PbxStage__c stgObj = new PbxStage__c();
+        stgObj.id = obj.id;
+        stgObj.name = obj.id;
+        updateList.add(stgObj);
+    }
+    if(updateList.size() > 0){
+        update updateList;
+    }
+}","371","2016-03-07T11:24:43.000Z","00515000006PjX3AAK","2016-03-07T11:28:59.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"
+"01q15000001dXxUAAU","","UpdateSortPositionAnswer","PbxAnswer__c","false","true","false","false","true","false","true","false","36.0","Active","false","3.181635158E9","trigger UpdateSortPositionAnswer on PbxAnswer__c (after insert ,before delete) {
+    List<PbxAnswer__c>ansList = new List<PbxAnswer__c>();
+    
+    if(trigger.isInsert){
+        map<string,integer> quesMap = new map<string,integer>();
+        set<string> ansSet = new set<string>();
+        for(PbxAnswer__c obj : trigger.new){
+            quesMap.put(obj.question__c,null);
+            ansSet.add(obj.id);
+            
+        }
+        
+        if(quesMap.size() > 0 && ansSet.size() > 0){
+            for(AggregateResult obj : [select question__c pl,Max(sortPosition__c) max from PbxAnswer__c where question__c in : quesMap.keySet() group by question__c ]){
+                if(obj.get('pl') != null && obj.get('max') != null){
+                   quesMap.put(string.valueOf(obj.get('pl')), integer.valueOf(obj.get('max'))); 
+                }        
+            }
+            
+            for(PbxAnswer__c obj : [select id,question__c,sortPosition__c from PbxAnswer__c where id in : ansSet]){
+                if(quesMap.get(obj.question__c) != null){
+                    obj.sortPosition__c = quesMap.get(obj.question__c) + 1;
+                    quesMap.put(obj.question__c,quesMap.get(obj.question__c) + 1);
+                }else{
+                    obj.sortPosition__c = 0;
+                    quesMap.put(obj.question__c,0);
+                }
+                ansList.add(obj);
+            }
+            
+            if(ansList.size() > 0){
+                update ansList;
+            }
+        }                    
+    }else if(trigger.isDelete){
+        map<string,decimal> quesMap2 = new map<string,decimal>();
+        
+        for(PbxAnswer__c obj : trigger.old){
+            quesMap2.put(obj.question__c,obj.sortPosition__c);
+        }
+        if(quesMap2.size() > 0){
+            for(PbxAnswer__c obj : [select id , sortPosition__c,question__c from PbxAnswer__c where question__c in : quesMap2.keySet()]){
+                if(quesMap2.containsKey(obj.question__c) && obj.sortPosition__c > quesMap2.get(obj.question__c)){
+                    obj.sortPosition__c = obj.sortPosition__c - 1;
+                    ansList.add(obj);                        
+                }
+            }
+            if(ansList.size() > 0){
+                update ansList;
+            }            
+        }
+    }
+
+}","2245","2016-05-19T07:23:37.000Z","00515000006PjX3AAK","2016-05-19T07:23:39.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"
+"01q15000001JBCPAA4","","OnTrackOffTrackCalculation","PbxQuestionInstance__c","true","true","true","true","true","false","true","true","38.0","Active","false","3.858702978E9","trigger OnTrackOffTrackCalculation on PbxQuestionInstance__c (before insert, before update, after insert, after update, before delete, after undelete) {
+    
+    if((trigger.isUpdate || trigger.isInsert) && trigger.isBefore){
+        Map<String, Decimal> singleCHighSMap = new Map<String, Decimal>();
+        Map<String, Decimal> questionPointsMap = new Map<String, Decimal>();
+    
+        //filling question(original record) id to fetch points  
+        for(PbxQuestionInstance__c obj: trigger.new){
+            if(obj.questionId__c != NULL && obj.questionId__c.trim().length() > 14){
+                questionPointsMap.put(obj.questionId__c, NULL);
+                //filling singleCHighSMap for single choice only because high score of single choice type ques. should be max(weight__c) of answer instance because user can select only one answer  
+                if(obj.responseType__c == 'SingleChoice'){
+                    singleCHighSMap.put(obj.id, NULL);
+                }
+                //playStageMap.put(obj.play__c, NULL);
+            }
+        }
+        //perform all actions when question instances have questionId(original record id)
+        if(questionPointsMap.size() > 0){
+            //retrieve questions
+            for(PbxQuestion__c obj : [SELECT points__c FROM PbxQuestion__c WHERE id IN: questionPointsMap.keySet()]){
+                questionPointsMap.put(obj.id, obj.points__c);
+            }
+            
+            //calculate hight score for single choice quest.
+            if(singleCHighSMap.size() > 0){
+                for(AggregateResult agg : [SELECT questionInstance__c id, Max(weight__c) mxW FROM PbxAnswerInstance__c WHERE questionInstance__c IN :singleCHighSMap.keySet() GROUP BY questionInstance__c]){
+                    singleCHighSMap.put((String)agg.get('id'), (Decimal)agg.get('mxW'));
+                }
+            }
+            
+            //Calculate Scores at Question Level
+            for(PbxQuestionInstance__c obj: trigger.new){
+                if(obj.questionId__c != NULL && obj.questionId__c.trim().length() > 14){
+                    if(obj.responseType__c == 'SingleChoice'){
+                        if(singleCHighSMap.get(obj.id) != NULL && questionPointsMap.get(obj.questionId__c) != NULL){
+                            obj.HighestScore__c = (questionPointsMap.get(obj.questionId__c) * singleCHighSMap.get(obj.id));
+                        }else{
+                            obj.HighestScore__c = 0;
+                        }
+                    }else{
+                        if(questionPointsMap.get(obj.questionId__c) != NULL)
+                            obj.HighestScore__c = (questionPointsMap.get(obj.questionId__c) * obj.Total_Allowed_Score__c);
+                        else
+                            obj.HighestScore__c = 0;
+                    }                    
+                    if(questionPointsMap.get(obj.questionId__c) != NULL)
+                        obj.ActualScore__c = (questionPointsMap.get(obj.questionId__c) * obj.Score__c);
+                    else
+                        obj.ActualScore__c = 0;
+                }
+            }
+            
+                
+        }
+    }else if((trigger.isUpdate || trigger.isInsert) && trigger.isAfter){
+        Map<String, List<PbxStageInstance__c>> stageMap = new Map<String, List<PbxStageInstance__c>>();
+        Map<String, Set<String>> stageIdMap = new Map<String, Set<String>>();
+        Map<String, Decimal> stageHSMap = new Map<String, Decimal>();
+        Map<String, Decimal> stageASMap = new Map<String, Decimal>();
+        Map<String, Decimal> stageAnsMap = new Map<String, Decimal>();
+        //Calculate Scores at Stage Level
+        //getting all process instance ids
+        for(PbxQuestionInstance__c obj: trigger.new){
+            if(obj.ProcessInstance__c != NULL && String.valueOf(obj.ProcessInstance__c).trim().length() > 14){
+                stageIdMap.put(obj.ProcessInstance__c, NULL);
+                
+            }
+            
+        }
+        if(stageIdMap.size() > 0){
+            //retrieve stage records related to perticular process instance
+            for(PbxStageInstance__c obj : [SELECT ProcessInstance__c, ActualScore__c, CumulativeScore__c, HighestScore__c 
+                                           FROM PbxStageInstance__c 
+                                           WHERE ProcessInstance__c IN: stageIdMap.keySet() 
+                                           AND ProcessInstance__r.Opportunity__c != NULL //12TH FEB ADDED TO FIRE TRIGGER FOR OPPORTUNITY ONLY
+                                           ORDER BY sortPosition__c]){
+                Set<String> stageIdSet;
+                if(stageIdMap.containsKey(obj.ProcessInstance__c) && stageIdMap.get(obj.ProcessInstance__c) != NULL){
+                    stageIdSet = stageIdMap.get(obj.ProcessInstance__c);
+                             
+                }else{
+                    stageIdSet = new Set<String>();
+                }
+                
+                List<PbxStageInstance__c> stageList;
+                if(stageIdMap.containsKey(obj.ProcessInstance__c) && stageIdMap.get(obj.ProcessInstance__c) != NULL){
+                    stageList = stageMap.get(obj.ProcessInstance__c);
+                             
+                }else{
+                    stageList = new List<PbxStageInstance__c>();
+                }
+                
+                stageIdSet.add(obj.id);
+                stageList.add(obj);
+                stageIdMap.put(obj.ProcessInstance__c, stageIdSet);
+                stageMap.put(obj.ProcessInstance__c, stageList);
+            }
+            
+            //get HighestScore__c ActualScore__c for stages
+            for(AggregateResult agg : [SELECT PlayInstance__r.stageInstance__c id, SUM(isAnswered__c) isanswered, SUM(HighestScore__c) hscore, SUM(ActualScore__c) ascore FROM PbxQuestionInstance__c WHERE ProcessInstance__c IN: stageIdMap.keySet() GROUP BY PlayInstance__r.stageInstance__c]){
+                stageHSMap.put((String)agg.get('id'), (Decimal)agg.get('hscore'));
+                stageASMap.put((String)agg.get('id'), (Decimal)agg.get('ascore'));  
+                stageAnsMap.put((String)agg.get('id'), (Decimal)agg.get('isanswered'));     
+            }
+            system.debug('##stageHSMap##= '+ stageHSMap);
+            system.debug('##stageASMap##= '+ stageASMap);
+            system.debug('##stageAnsMap##= '+ stageASMap);
+            List<PbxStageInstance__c> stageUpdateList = new List<PbxStageInstance__c>();
+            for(List<PbxStageInstance__c> stgList : stageMap.values()){
+                
+                Boolean inFirstTime = false;
+                Decimal cumulativeSum = 0;
+                Decimal actualSum = 0;
+                for(PbxStageInstance__c obj : stgList){
+                    //filling Highest Score
+                    if(stageHSMap.containsKey(obj.id)){
+                        obj.HighestScore__c = stageHSMap.get(obj.id);
+                    }
+                    
+                    //filling Actual Score
+                    if(stageASMap.containsKey(obj.id) && actualSum != NULL && stageASMap.get(obj.id) != NULL){
+                        obj.ActualScore__c = actualSum + stageASMap.get(obj.id);
+                        actualSum += stageASMap.get(obj.id);
+                        
+                        if(stageAnsMap.get(obj.id) > 0){
+                            //filling Cumulative Score
+                            if(stageHSMap.containsKey(obj.id) && cumulativeSum != NULL && stageHSMap.get(obj.id) != NULL){
+                                obj.CumulativeScore__c = cumulativeSum + stageHSMap.get(obj.id);
+                                cumulativeSum += stageHSMap.get(obj.id);
+                            }
+                        }else{
+                            obj.CumulativeScore__c = cumulativeSum;
+                        }
+                    }
+                    system.debug('##Obj##= '+ obj);
+                    stageUpdateList.add(obj);
+                    inFirstTime = true;        
+                }    
+            }
+            //updating stage level calculation finally
+            if(stageUpdateList.size() > 0){
+                update stageUpdateList;
+            }
+        }
+    }
+}","6947","2016-11-08T14:43:58.000Z","00515000006PhzjAAC","2017-02-23T08:58:34.000Z","00515000006PhzjAAC","2018-06-02T13:54:13.000Z"
+"01q15000001UesHAAS","","OpportunityBeforeDelete","Opportunity","false","false","false","false","true","false","true","false","25.0","Active","false","3.1786033E9","trigger OpportunityBeforeDelete on Opportunity (before delete) {
+    Set<Id> oppIds = new Set<Id>();
+    for (Opportunity opp : trigger.old){
+        oppIds.add( opp.Id );
+    }
+    
+    List<PbxProcessInstance__c> pIDelete = [SELECT Id FROM PbxProcessInstance__c WHERE Opportunity__c in: oppIds];
+    delete pIDelete;
+}","316","2016-01-18T07:51:18.000Z","00515000006PjX3AAK","2016-01-18T07:51:18.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"
+"01q15000001dWpXAAU","","UpdateSortPositionQuestion","PbxQuestion__c","false","true","false","false","true","false","true","false","36.0","Active","false","1.103469825E9","trigger UpdateSortPositionQuestion on PbxQuestion__c (after insert ,before delete) {
+    List<PbxQuestion__c>quesList = new List<PbxQuestion__c>();
+    
+    if(trigger.isInsert){
+        map<string,integer> playMap = new map<string,integer>();
+        set<string> quesSet = new set<string>();
+        for(PbxQuestion__c obj : trigger.new){
+            playMap.put(obj.play__c,null);
+            quesSet.add(obj.id);
+            
+        }
+        
+        if(playMap.size() > 0 && quesSet.size() > 0){
+            for(AggregateResult obj : [select play__c pl,Max(sortPosition__c) max from PbxQuestion__c where play__c in : playMap.keySet() group by play__c ]){
+                if(obj.get('pl') != null && obj.get('max') != null){
+                   playMap.put(string.valueOf(obj.get('pl')), integer.valueOf(obj.get('max'))); 
+                }        
+            }
+            
+            for(PbxQuestion__c obj : [select id,play__c,sortPosition__c from PbxQuestion__c where id in : quesSet]){
+                if(playMap.get(obj.play__c) != null){
+                    obj.sortPosition__c = playMap.get(obj.play__c) + 1;
+                    playMap.put(obj.play__c,playMap.get(obj.play__c) + 1);
+                }else{
+                    obj.sortPosition__c = 0;
+                    playMap.put(obj.play__c,0);
+                }
+                quesList.add(obj);
+            }
+            
+            if(quesList.size() > 0){
+                update quesList;
+            }
+        }                    
+    }else if(trigger.isDelete){
+        map<string,decimal> playMap2 = new map<string,decimal>();
+        
+        for(PbxQuestion__c obj : trigger.old){
+            playMap2.put(obj.play__c,obj.sortPosition__c);
+        }
+        if(playMap2.size() > 0){
+            for(PbxQuestion__c obj : [select id , sortPosition__c,play__c from PbxQuestion__c where play__c in : playMap2.keySet()]){
+                if(playMap2.containsKey(obj.play__c) && obj.sortPosition__c > playMap2.get(obj.play__c)){
+                    obj.sortPosition__c = obj.sortPosition__c - 1;
+                    quesList.add(obj);                        
+                }
+            }
+            if(quesList.size() > 0){
+                update quesList;
+            }            
+        }
+    }
+
+}","2218","2016-05-06T10:11:48.000Z","00515000006PjX3AAK","2016-05-06T10:11:52.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"
+"01q15000001JHudAAG","","LeadConversionTrigger","Lead","false","false","false","true","false","false","true","false","39.0","Active","false","5.96351676E8","trigger LeadConversionTrigger on Lead (After Update) {
+    Map<String, String> leadToOpportunityMap = new Map<String, String>();
+    
+    for(Lead leadObj : Trigger.new){
+        if(leadObj.isConverted){
+            leadToOpportunityMap.put(leadObj.Id, leadObj.ConvertedOpportunityId);  
+        }
+    }
+    if(leadToOpportunityMap.size() > 0)
+        LeadConversionTriggerHandler.createPlaybooxAttachmentForConvertedOpportunity(leadToOpportunityMap);
+    
+}","449","2017-02-11T06:45:07.000Z","00515000006PhzjAAC","2017-02-13T11:30:37.000Z","00515000006PhzjAAC","2018-06-02T13:54:13.000Z"
+"01q15000001dUWpAAM","","OpportunityPlayBookFieldUpdate","PbxProcessInstance__c","false","true","false","true","false","true","true","true","36.0","Active","false","3.857571424E9","trigger OpportunityPlayBookFieldUpdate on PbxProcessInstance__c (after insert,after update,after delete,after undelete) {
+    Map<String,PbxProcessInstance__c> oppMap = new Map<String,PbxProcessInstance__c>();
+    Set<Id> processInstanceIds = new Set<Id>();
+    List<Opportunity> oppsToUpdate = new List<Opportunity>();
+    List<Account> accToUpdate = new List<Account>();
+    List<Lead> leadToUpdate = new List<Lead>();
+    
+    //Puting those opportunity which are updated.
+    if(trigger.isUpdate){
+        for(PbxProcessInstance__c processIns : trigger.new){
+            if(trigger.oldMap.get(processIns.id).opportunity__c != null && trigger.oldMap.get(processIns.id).opportunity__c != processIns.Opportunity__c)
+                oppMap.put((String)trigger.oldMap.get(processIns.id).opportunity__c,null);                                                  
+            if(processIns.Opportunity__c!=null)oppMap.put(processIns.Opportunity__c,processIns); 
+            
+            processInstanceIds.add(processIns.Id);             
+        }
+        Map<Id, PbxProcessInstance__c> piMap = new Map<Id, PbxProcessInstance__c>([SELECT Id, Score__c, RedFlagCount__c, PlaybookEntityType__c, 
+                                                                    Opportunity__r.Id, Lead__r.Id, Account__r.Id
+                                                                    FROM PbxProcessInstance__c WHERE Id in: processInstanceIds]);
+        
+        for (PbxProcessInstance__c pi : Trigger.new) {
+            PbxProcessInstance__c piFromDb = piMap.get(pi.Id);
+    
+            if(piFromDb.Opportunity__r !=null && piFromDb.PlaybookEntityType__c == 'Opportunity')
+            {
+                Opportunity opp = piFromDb.Opportunity__r;
+                opp.WinnabilityScore__c = piFromDb.Score__c < 0?0:piFromDb.Score__c;
+                opp.RedFlagCount__c = piFromDb.RedFlagCount__c;
+                
+                oppsToUpdate.add(opp);            
+            }else if(piFromDb.Lead__r!=null && piFromDb.PlaybookEntityType__c == 'Lead'){
+            
+            }else if(piFromDb.Account__r!=null && piFromDb.PlaybookEntityType__c == 'Account'){
+            }
+        }       
+    }else {  //On Insert, delete and undelete.
+        //Filling Map with there opportunity Id.
+        for(PbxProcessInstance__c processIns : trigger.isDelete ? trigger.old : trigger.new){
+            if(processIns.Opportunity__c!=null)oppMap.put(processIns.Opportunity__c,processIns);
+        }
+    }
+    
+    //On Delete
+    if(trigger.isDelete){        
+        for (PbxProcessInstance__c pInstance : trigger.old){
+            processInstanceIds.add( pInstance.Id );
+        }
+        
+        Map<Id, PbxProcessInstance__c> pIMap = new Map<Id, PbxProcessInstance__c>([SELECT Id, PlaybookEntityType__c, Opportunity__r.Id, Account__r.Id, Lead__r.Id FROM PbxProcessInstance__c WHERE Id in: processInstanceIds]);
+        
+        for (PbxProcessInstance__c pI : trigger.old) {
+            //if(pI.PlaybookEntityType__c == 'Opportunity')
+            if(pI.Opportunity__r !=null && pI.PlaybookEntityType__c == 'Opportunity')
+            {
+                Opportunity opp = pIMap.get(pI.Id).Opportunity__r;
+                opp.PlaybookName__c = '';
+                opp.WinnabilityScore__c = 0;
+                opp.RedFlagCount__c = 0;
+                oppsToUpdate.add(opp);
+            }else if(pI.Lead__r !=null && pI.PlaybookEntityType__c == 'Lead'){
+            
+            }else if(pI.Account__r !=null && pI.PlaybookEntityType__c == 'Account'){
+            }
+    
+        }
+    }
+    
+    if(oppMap.size()>0){
+        //Fatching record according to opportunity Id of processInstance.
+        List<Opportunity> oppList = [select id,PlaybookName__c from Opportunity where id in : oppMap.keySet()];
+        if(oppList!=null && oppList.size()>0){
+            for(Opportunity opp : oppList){
+                opp.PlaybookName__c = trigger.isDelete ? '' : oppMap.get(opp.id)==null ? '' : oppMap.get(opp.id).name__c;
+            }    
+            update oppList;
+        }
+    }
+    
+    //Update Opportunity , Account and Lead.
+    if(oppsToUpdate.size() > 0){
+        update oppsToUpdate;
+    }
+    if(accToUpdate.size() > 0){
+        update accToUpdate;
+    }
+    if(leadToUpdate.size() > 0){
+        update leadToUpdate;
+    }
+    
+}","3870","2016-04-19T13:02:08.000Z","00515000006PjX3AAK","2016-05-13T06:08:34.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"
+"01q15000001dWpcAAE","","UpdateSortPositionMessage","PbxMessage__c","false","true","false","false","true","false","true","false","36.0","Active","false","1.09901873E8","trigger UpdateSortPositionMessage  on PbxMessage__c (after insert ,before delete) {
+    List<PbxMessage__c>msgList = new List<PbxMessage__c>();
+    
+    if(trigger.isInsert){
+        map<string,integer> playMap = new map<string,integer>();
+        set<string> msgSet = new set<string>();
+        for(PbxMessage__c obj : trigger.new){
+            playMap.put(obj.play__c,null);
+            msgSet.add(obj.id);
+            
+        }
+        
+        if(playMap.size() > 0 && msgSet.size() > 0){
+            for(AggregateResult obj : [select play__c pl,Max(sortPosition__c) max from PbxMessage__c where play__c in : playMap.keySet() group by play__c ]){
+                if(obj.get('pl') != null && obj.get('max') != null){
+                   playMap.put(string.valueOf(obj.get('pl')), integer.valueOf(obj.get('max'))); 
+                }        
+            }
+            
+            for(PbxMessage__c obj : [select id,play__c,sortPosition__c from PbxMessage__c where id in : msgSet]){
+                if(playMap.get(obj.play__c) != null){
+                    obj.sortPosition__c = playMap.get(obj.play__c) + 1;
+                    playMap.put(obj.play__c,playMap.get(obj.play__c) + 1);
+                }else{
+                    obj.sortPosition__c = 0;
+                    playMap.put(obj.play__c,0);
+                }
+                msgList.add(obj);
+            }
+            
+            if(msgList.size() > 0){
+                update msgList;
+            }
+        }                    
+    }else if(trigger.isDelete){
+        map<string,decimal> playMap2 = new map<string,decimal>();
+        
+        for(PbxMessage__c obj : trigger.old){
+            playMap2.put(obj.play__c,obj.sortPosition__c);
+        }
+        if(playMap2.size() > 0){
+            for(PbxMessage__c obj : [select id , sortPosition__c,play__c from PbxMessage__c where play__c in : playMap2.keySet()]){
+                if(playMap2.containsKey(obj.play__c) && obj.sortPosition__c > playMap2.get(obj.play__c)){
+                    obj.sortPosition__c = obj.sortPosition__c - 1;
+                    msgList.add(obj);                        
+                }
+            }
+            if(msgList.size() > 0){
+                update msgList;
+            }            
+        }
+    }
+}","2197","2016-05-06T10:18:31.000Z","00515000006PjX3AAK","2016-05-06T10:18:54.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"
+"01q15000001dWphAAE","","UpdateSortPositionTool","PbxTool__c","false","true","false","false","true","false","true","false","36.0","Active","false","1.529123271E9","trigger UpdateSortPositionTool  on PbxTool__c (after insert ,before delete) {
+    List<PbxTool__c>toolList = new List<PbxTool__c>();
+    
+    if(trigger.isInsert){
+        map<string,integer> playMap = new map<string,integer>();
+        set<string> msgSet = new set<string>();
+        for(PbxTool__c obj : trigger.new){
+            playMap.put(obj.play__c,null);
+            msgSet.add(obj.id);
+            
+        }
+        
+        if(playMap.size() > 0 && msgSet.size() > 0){
+            for(AggregateResult obj : [select play__c pl,Max(sortPosition__c) max from PbxTool__c where play__c in : playMap.keySet() group by play__c ]){
+                if(obj.get('pl') != null && obj.get('max') != null){
+                   playMap.put(string.valueOf(obj.get('pl')), integer.valueOf(obj.get('max'))); 
+                }        
+            }
+            
+            for(PbxTool__c obj : [select id,play__c,sortPosition__c from PbxTool__c where id in : msgSet]){
+                if(playMap.get(obj.play__c) != null){
+                    obj.sortPosition__c = playMap.get(obj.play__c) + 1;
+                    playMap.put(obj.play__c,playMap.get(obj.play__c) + 1);
+                }else{
+                    obj.sortPosition__c = 0;
+                    playMap.put(obj.play__c,0);
+                }
+                toolList.add(obj);
+            }
+            
+            if(toolList.size() > 0){
+                update toolList;
+            }
+        }                    
+    }else if(trigger.isDelete){
+        map<string,decimal> playMap2 = new map<string,decimal>();
+        
+        for(PbxTool__c obj : trigger.old){
+            playMap2.put(obj.play__c,obj.sortPosition__c);
+        }
+        if(playMap2.size() > 0){
+            for(PbxTool__c obj : [select id , sortPosition__c,play__c from PbxTool__c where play__c in : playMap2.keySet()]){
+                if(playMap2.containsKey(obj.play__c) && obj.sortPosition__c > playMap2.get(obj.play__c)){
+                    obj.sortPosition__c = obj.sortPosition__c - 1;
+                    toolList.add(obj);                        
+                }
+            }
+            if(toolList.size() > 0){
+                update toolList;
+            }            
+        }
+    }
+}","2171","2016-05-06T10:21:24.000Z","00515000006PjX3AAK","2016-05-06T10:21:32.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"
+"01q15000001dVQzAAM","","DeleteProcessRecords","PbxProcess__c","false","false","false","false","true","false","true","false","36.0","Active","false","1.847217002E9","/**
+        Name                 :    DeleteProcessRecords 
+        Description          :    This trigger is used to delete Child Process Records.
+        Date                 :    April 25, 2016
+
+*/
+
+trigger DeleteProcessRecords on PbxProcess__c (before delete) {
+
+    List<PbxProcess__c >  parentProcessList = new List<PbxProcess__c >();
+  
+    // Deleting Child Process records
+
+    parentProcessList  = [select id from PbxProcess__c  where ParentPublishProcess__c in: trigger.old];
+    if(parentProcessList !=null && parentProcessList.size()>0)
+       delete parentProcessList ;
+    
+}","341","2016-04-25T07:40:51.000Z","00515000006PjX3AAK","2016-04-25T11:31:59.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"
+"01q15000001dU2kAAE","","UpdateSortPositionPlay","PbxPlay__c","false","true","false","false","true","false","true","false","36.0","Active","false","3.563782184E9","trigger UpdateSortPositionPlay on PbxPlay__c (after insert ,before delete ) {
+    List<PbxPlay__c>playInsList = new List<PbxPlay__c>();
+    
+    if(trigger.isInsert){
+        map<string,integer> stageMap = new map<string,integer>();
+        set<string> playSet = new set<string>();
+        for(PbxPlay__c obj : trigger.new){
+            stageMap.put(obj.stage__c,null);
+            playSet.add(obj.id);
+            
+        }
+        
+        if(stageMap.size() > 0 && playSet.size() > 0){
+            for(AggregateResult obj : [select stage__c stg,Max(sortPosition__c) max from PbxPlay__c where stage__c in : stageMap.keySet() group by stage__c ]){
+                if(obj.get('stg') != null && obj.get('max') != null){
+                   stageMap.put(string.valueOf(obj.get('stg')), integer.valueOf(obj.get('max'))); 
+                }        
+            }
+            
+            for(PbxPlay__c obj : [select id,stage__c,sortPosition__c from PbxPlay__c where id in : playSet]){
+                obj.name = obj.id;
+                if(stageMap.get(obj.stage__c) != null){
+                    obj.sortPosition__c = stageMap.get(obj.stage__c) + 1;
+                    stageMap.put(obj.stage__c,stageMap.get(obj.stage__c) + 1);
+                }else{
+                    obj.sortPosition__c = 0;
+                    stageMap.put(obj.stage__c,0);
+                }
+                playInsList.add(obj);
+            }
+            
+            if(playInsList.size() > 0){
+                update playInsList;
+            }
+        }                    
+    }else if(trigger.isDelete){
+        map<string,decimal> stageMap2 = new map<string,decimal>();
+        
+        for(PbxPlay__c obj : trigger.old){
+            stageMap2.put(obj.stage__c,obj.sortPosition__c);
+        }
+        if(stageMap2.size() > 0){
+            for(PbxPlay__c obj : [select id , sortPosition__c,stage__c from PbxPlay__c where stage__c in : stageMap2.keySet()]){
+                if(stageMap2.containsKey(obj.stage__c) && obj.sortPosition__c > stageMap2.get(obj.stage__c)){
+                    obj.sortPosition__c = obj.sortPosition__c - 1;
+                    playInsList.add(obj);                        
+                }
+            }
+            if(playInsList.size() > 0){
+                update playInsList;
+            }            
+        }
+    }
+
+}","2265","2016-04-15T10:06:23.000Z","00515000006PjX3AAK","2016-05-12T06:08:35.000Z","00515000006PjX3AAK","2018-06-02T13:54:13.000Z"

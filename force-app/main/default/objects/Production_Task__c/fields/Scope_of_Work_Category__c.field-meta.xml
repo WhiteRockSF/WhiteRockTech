@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Scope_of_Work_Category__c</fullName>
+    <description>Maps to Contract Deliverable Scope of Work Deliverables</description>
+    <label>Scope of Work Category</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Lead &amp; Sales Processes</fullName>
+                <default>false</default>
+                <label>Lead &amp; Sales Processes</label>
+            </value>
+            <value>
+                <fullName>Client Onboarding &amp; Management Processes</fullName>
+                <default>false</default>
+                <label>Client Onboarding &amp; Management Processes</label>
+            </value>
+            <value>
+                <fullName>Test Kit Component Inventory Management</fullName>
+                <default>false</default>
+                <label>Test Kit Component Inventory Management</label>
+            </value>
+            <value>
+                <fullName>Test Kit Inventory Management</fullName>
+                <default>false</default>
+                <label>Test Kit Inventory Management</label>
+            </value>
+            <value>
+                <fullName>Test Kit Request &amp; Distribution Tracking System</fullName>
+                <default>false</default>
+                <label>Test Kit Request &amp; Distribution Tracking System</label>
+            </value>
+            <value>
+                <fullName>Client to Courier Specimen Intake Process</fullName>
+                <default>false</default>
+                <label>Client to Courier Specimen Intake Process</label>
+            </value>
+            <value>
+                <fullName>Specimen Journey To and Back From LIS System Process</fullName>
+                <default>false</default>
+                <label>Specimen Journey To and Back From LIS System Process</label>
+            </value>
+            <value>
+                <fullName>360-Degree View of the Specimen Journey</fullName>
+                <default>false</default>
+                <label>360-Degree View of the Specimen Journey</label>
+            </value>
+            <value>
+                <fullName>Client Services – Billing Exceptions, Inbound &amp; Outbound</fullName>
+                <default>false</default>
+                <label>Client Services – Billing Exceptions, Inbound &amp; Outbound</label>
+            </value>
+            <value>
+                <fullName>Data Clean Up &amp; Data Migration</fullName>
+                <default>false</default>
+                <label>Data Clean Up &amp; Data Migration</label>
+            </value>
+            <value>
+                <fullName>Building Integration to LigoLab &amp; QuickBooks</fullName>
+                <default>false</default>
+                <label>Building Integration to LigoLab &amp; QuickBooks</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

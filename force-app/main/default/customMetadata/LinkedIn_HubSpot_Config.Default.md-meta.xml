@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Default</label>
+    <protected>false</protected>
+    <values>
+        <field>HubSpot_Custom_Object_Type_Id__c</field>
+        <value xsi:nil="true"/>
+    </values>
+    <values>
+        <field>HubSpot_Property_Campaign__c</field>
+        <value xsi:type="xsd:string">linkedin_campaign_name</value>
+    </values>
+    <values>
+        <field>HubSpot_Property_Clicks__c</field>
+        <value xsi:type="xsd:string">linkedin_clicks</value>
+    </values>
+    <values>
+        <field>HubSpot_Property_Conversions__c</field>
+        <value xsi:type="xsd:string">linkedin_conversions</value>
+    </values>
+    <values>
+        <field>HubSpot_Property_Impressions__c</field>
+        <value xsi:type="xsd:string">linkedin_impressions</value>
+    </values>
+    <values>
+        <field>HubSpot_Target_Type__c</field>
+        <value xsi:type="xsd:string">Companies</value>
+    </values>
+</CustomMetadata>

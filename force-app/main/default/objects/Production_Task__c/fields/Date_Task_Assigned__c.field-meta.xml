@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Date_Task_Assigned__c</fullName>
+    <description>When is this task due to begin</description>
+    <inlineHelpText>When is this task due to begin</inlineHelpText>
+    <label>Date Task Assigned</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Date</type>
+</CustomField>

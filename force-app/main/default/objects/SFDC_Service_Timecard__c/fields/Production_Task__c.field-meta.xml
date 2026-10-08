@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Production_Task__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Used to relate specific time to a deliverable as opposed to relating time to the management of the overall project at the production level.</description>
+    <inlineHelpText>Used to relate specific time to a deliverable as opposed to relating time to the management of the overall project at the production level.</inlineHelpText>
+    <label>Production Task</label>
+    <referenceTo>Production_Task__c</referenceTo>
+    <relationshipLabel>Service Timecards</relationshipLabel>
+    <relationshipName>Service_Timecards</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

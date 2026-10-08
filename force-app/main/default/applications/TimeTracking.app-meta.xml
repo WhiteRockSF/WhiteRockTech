@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <defaultLandingTab>standard-home</defaultLandingTab>
+    <description>With Time Tracking for AppExchange, you can track the hours your service team has worked compared with the number of hours on open service contracts so you know when contracts are about to expire and can take action to renew them in a timely manner.</description>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>Time Tracking</label>
+    <logo>TimeTracking/AppExchangeLogo.gif</logo>
+    <tabs>AboutTimeTracking</tabs>
+    <tabs>standard-Contract</tabs>
+    <tabs>SFDC_Service_Timecard__c</tabs>
+    <tabs>standard-report</tabs>
+    <tabs>standard-Dashboard</tabs>
+    <tabs>Credential__c</tabs>
+    <tabs>Tips_Tricks__c</tabs>
+    <tabs>QB_Stats__c</tabs>
+    <tabs>Projected_Time__c</tabs>
+    <tabs>Delivery_Map</tabs>
+</CustomApplication>

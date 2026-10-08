@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <decisions>
+        <name>Is_Lead_Hot</name>
+        <label>Is Lead Hot?</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>X4_or_more_Criteria_checked</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>CountCriteria</leftValueReference>
+                <operator>GreaterThanOrEqualTo</operator>
+                <rightValue>
+                    <numberValue>4.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Set_Rating_to_Hot</targetReference>
+            </connector>
+            <label>4 or more Criteria checked</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>CountCriteria</name>
+        <dataType>Number</dataType>
+        <expression>IF({!$Record.company_s_desired_business_outcome__c}, 1, 0)
++ IF({!$Record.What_else_does_it_depend_on__c}, 1, 0)
++ IF({!$Record.How_is_this_issue_affecting_the_company__c}, 1, 0)
++ IF({!$Record.Who_else_might_this_affect__c}, 1, 0)
++ IF({!$Record.How_does_this_affect_other_processes__c}, 1, 0)
++ IF({!$Record.Who_else_is_involved_in_the_process__c}, 1, 0)
++ IF({!$Record.Can_you_walk_me_through_your_process__c}, 1, 0)
++ IF({!$Record.How_does_this_affect_your_people__c}, 1, 0)
++ IF({!$Record.Who_is_held_accountable_for_this_measure__c}, 1, 0)
++ IF({!$Record.What_company_measure_does_this_effect__c}, 1, 0)
++ IF({!$Record.How_did_you_try_to_remedy__c}, 1, 0)
++ IF({!$Record.Have_you_tried_to_remedy_this_previously__c}, 1, 0)
++ IF({!$Record.How_often_does_this_occur__c}, 1, 0)
++ IF({!$Record.When_does_this_occur__c}, 1, 0)
++ IF({!$Record.Why_do_you_have_to_remedy_this_now__c}, 1, 0)
++ IF({!$Record.Why_do_you_think_this_happens__c}, 1, 0)
++ IF({!$Record.Why_do_you_think_this_is_a_problem__c}, 1, 0)</expression>
+        <scale>0</scale>
+    </formulas>
+    <interviewLabel>Lead Rating update on criteria {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Lead Rating update on criteria</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <name>Set_Rating_to_Hot</name>
+        <label>Set Rating to Hot</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Rating</field>
+            <operator>NotEqualTo</operator>
+            <value>
+                <stringValue>Hot</stringValue>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Rating</field>
+            <value>
+                <stringValue>Hot</stringValue>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Is_Lead_Hot</targetReference>
+        </connector>
+        <object>Lead</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Draft</status>
+</Flow>

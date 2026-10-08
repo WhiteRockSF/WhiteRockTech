@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Service_Performed__c</fullName>
+    <label>Service Performed</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Billable Item</fullName>
+                <default>false</default>
+                <label>Billable Item</label>
+            </value>
+            <value>
+                <fullName>Configuration</fullName>
+                <default>false</default>
+                <label>Configuration</label>
+            </value>
+            <value>
+                <fullName>Customer Meeting</fullName>
+                <default>false</default>
+                <label>Customer Meeting</label>
+            </value>
+            <value>
+                <fullName>Design</fullName>
+                <default>false</default>
+                <label>Design</label>
+            </value>
+            <value>
+                <fullName>Development</fullName>
+                <default>false</default>
+                <label>Development</label>
+            </value>
+            <value>
+                <fullName>Installation</fullName>
+                <default>false</default>
+                <label>Installation</label>
+            </value>
+            <value>
+                <fullName>Internal Meeting</fullName>
+                <default>false</default>
+                <label>Internal Meeting</label>
+            </value>
+            <value>
+                <fullName>Maintenance - Emergency Repair</fullName>
+                <default>false</default>
+                <label>Maintenance - Emergency Repair</label>
+            </value>
+            <value>
+                <fullName>Maintenance - Routine</fullName>
+                <default>false</default>
+                <label>Maintenance - Routine</label>
+            </value>
+            <value>
+                <fullName>Other - Specify in Notes</fullName>
+                <default>false</default>
+                <label>Other - Specify in Notes</label>
+            </value>
+            <value>
+                <fullName>Phone Consultation</fullName>
+                <default>false</default>
+                <label>Phone Consultation</label>
+            </value>
+            <value>
+                <fullName>Research</fullName>
+                <default>false</default>
+                <label>Research</label>
+            </value>
+            <value>
+                <fullName>Training</fullName>
+                <default>false</default>
+                <label>Training</label>
+            </value>
+            <value>
+                <fullName>Travel</fullName>
+                <default>false</default>
+                <label>Travel</label>
+            </value>
+            <value>
+                <fullName>Upgrade</fullName>
+                <default>false</default>
+                <label>Upgrade</label>
+            </value>
+            <value>
+                <fullName>Customer Meetings</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Customer Meetings</label>
+            </value>
+            <value>
+                <fullName>Replacement</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Replacement</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

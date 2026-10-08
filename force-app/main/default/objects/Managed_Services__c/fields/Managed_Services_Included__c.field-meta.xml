@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Managed_Services_Included__c</fullName>
+    <label>Managed Services Included</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Standard Objects</fullName>
+                <default>false</default>
+                <label>Standard Objects</label>
+            </value>
+            <value>
+                <fullName>Custom Development</fullName>
+                <default>false</default>
+                <label>Custom Development</label>
+            </value>
+            <value>
+                <fullName>Manage and administer Global Actions</fullName>
+                <default>false</default>
+                <label>Manage and administer Global Actions</label>
+            </value>
+            <value>
+                <fullName>Workflows (not include new workflows)</fullName>
+                <default>false</default>
+                <label>Workflows (not include new workflows)</label>
+            </value>
+            <value>
+                <fullName>Apex/Visualforce</fullName>
+                <default>false</default>
+                <label>Apex/Visualforce</label>
+            </value>
+            <value>
+                <fullName>Schema, Lightning Apps and Packages</fullName>
+                <default>false</default>
+                <label>Schema, Lightning Apps and Packages</label>
+            </value>
+            <value>
+                <fullName>Manage Users, Profiles, and Roles</fullName>
+                <default>false</default>
+                <label>Manage Users, Profiles, and Roles</label>
+            </value>
+            <value>
+                <fullName>Manage Apps</fullName>
+                <default>false</default>
+                <label>Manage Apps</label>
+            </value>
+            <value>
+                <fullName>Manage Territories</fullName>
+                <default>false</default>
+                <label>Manage Territories</label>
+            </value>
+            <value>
+                <fullName>Manage Company Profiles</fullName>
+                <default>false</default>
+                <label>Manage Company Profiles</label>
+            </value>
+            <value>
+                <fullName>Manage Security Controls</fullName>
+                <default>false</default>
+                <label>Manage Security Controls</label>
+            </value>
+            <value>
+                <fullName>Manage Domains</fullName>
+                <default>false</default>
+                <label>Manage Domains</label>
+            </value>
+            <value>
+                <fullName>Manage Communication Templates</fullName>
+                <default>false</default>
+                <label>Manage Communication Templates</label>
+            </value>
+            <value>
+                <fullName>Manage Translation Workbench</fullName>
+                <default>false</default>
+                <label>Manage Translation Workbench</label>
+            </value>
+            <value>
+                <fullName>Manage SFDC Databases</fullName>
+                <default>false</default>
+                <label>Manage SFDC Databases</label>
+            </value>
+            <value>
+                <fullName>Monitoring</fullName>
+                <default>false</default>
+                <label>Monitoring</label>
+            </value>
+            <value>
+                <fullName>Mobile Administration</fullName>
+                <default>false</default>
+                <label>Mobile Administration</label>
+            </value>
+            <value>
+                <fullName>Desktop Administration</fullName>
+                <default>false</default>
+                <label>Desktop Administration</label>
+            </value>
+            <value>
+                <fullName>Manage Lightning Components</fullName>
+                <default>false</default>
+                <label>Manage Lightning Components</label>
+            </value>
+            <value>
+                <fullName>Manage Email Administration</fullName>
+                <default>false</default>
+                <label>Manage Email Administration</label>
+            </value>
+            <value>
+                <fullName>Manage Google Apps</fullName>
+                <default>false</default>
+                <label>Manage Google Apps</label>
+            </value>
+            <value>
+                <fullName>Manage 3rd party app interfaces</fullName>
+                <default>false</default>
+                <label>Manage 3rd party app interfaces</label>
+            </value>
+            <value>
+                <fullName>Manage Existing Reports and Dashboards</fullName>
+                <default>false</default>
+                <label>Manage Existing Reports and Dashboards</label>
+            </value>
+            <value>
+                <fullName>SFDC Annual Support Services Tier 1</fullName>
+                <default>false</default>
+                <label>SFDC Annual Support Services Tier 1</label>
+            </value>
+            <value>
+                <fullName>SFDC Annual Support Services Tier 2</fullName>
+                <default>false</default>
+                <label>SFDC Annual Support Services Tier 2</label>
+            </value>
+            <value>
+                <fullName>SFDC Annual Support Services Tier 3</fullName>
+                <default>false</default>
+                <label>SFDC Annual Support Services Tier 3</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

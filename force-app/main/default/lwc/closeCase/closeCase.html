@@ -1,0 +1,7 @@
+<template>
+    <template if:true={isShow}>
+        <lightning-flow flow-api-name='case_to_close_for_Portal_user' flow-input-variables={inputVariables}
+            onstatuschange={handleStatusChange}>
+        </lightning-flow>
+    </template>
+</template>

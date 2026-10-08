@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Governance and Control</label>
+    <protected>false</protected>
+    <values>
+        <field>Check_List_Items__c</field>
+        <value xsi:type="xsd:string">Review recent configuration changes (fields, flows, automation)
+Identify changes that may not follow governance standards
+Assess overall system organization and structure
+Review automation usage and performance trends
+Identify risks related to lack of control or documentation
+Identify governance improvement recommendations</value>
+    </values>
+</CustomMetadata>
