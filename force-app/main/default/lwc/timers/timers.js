@@ -170,15 +170,16 @@ export default class Timer extends LightningElement {
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0');
         const day = String(today.getDate()).padStart(2, '0');
-        const tDate = `${year}-${month}-${day}`; 
+        const tDate = `${year}-${month}-${day}`;
+        const nextStart = this.getNextStartMinutesForDate(tDate);
 
         this.newCard = {
             Production__c: '',
             TaskRay_Task__c: '',
             Service__c: '',
             Date_of_Service__c: tDate,
-            Start_Time__c: '08:00:00.000',
-            End_Time__c: '17:00:00.000',
+            Start_Time__c: this.minutesToTimeString(nextStart),
+            End_Time__c: this.minutesToTimeString(nextStart + 60),
             Service_Notes__c: '',
             key: (Math.random().toString(36).substring(2, 15))
         };
@@ -239,23 +240,93 @@ export default class Timer extends LightningElement {
         }
     }
 
-    convertHoursToTimes(hours) {
-        // Start time is always 8:00 AM
-        const startHour = 8;
-        const startMinute = 0;
-        
-        // Calculate end time by adding hours
-        const totalMinutes = hours * 60;
-        let endTotalMinutes = (startHour * 60) + startMinute + totalMinutes;
-        
-        const endHour = Math.floor(endTotalMinutes / 60);
-        const endMinute = Math.floor(endTotalMinutes % 60);
-        
-        // Format as HH:MM:SS.mmm for Salesforce Time field
-        const startTime = `${String(startHour).padStart(2, '0')}:${String(startMinute).padStart(2, '0')}:00.000`;
-        const endTime = `${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}:00.000`;
-        
-        return { startTime, endTime };
+    timeToMinutes(value) {
+        if (value === null || value === undefined || value === '') {
+            return null;
+        }
+        if (typeof value === 'number') {
+            if (!Number.isFinite(value)) return null;
+            // Apex Time as ms since midnight
+            return Math.floor(value / 60000);
+        }
+        const parts = String(value).split(':');
+        if (parts.length < 2) return null;
+        const hours = parseInt(parts[0], 10);
+        const minutes = parseInt(parts[1], 10);
+        if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
+        return hours * 60 + minutes;
+    }
+
+    minutesToTimeString(totalMinutes) {
+        const safe = Math.max(0, Math.floor(totalMinutes));
+        const hours = Math.floor(safe / 60);
+        const minutes = safe % 60;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00.000`;
+    }
+
+    getNextStartMinutesForDate(dateStr, excludeCard) {
+        const WORK_DAY_START = 8 * 60; // 08:00 AM
+        let nextStart = WORK_DAY_START;
+        const dateKey = dateStr ? String(dateStr).split('T')[0] : null;
+        if (!dateKey) return nextStart;
+
+        (this.myList || []).forEach((card) => {
+            if (!card.Date_of_Service__c) return;
+            const cardDate = String(card.Date_of_Service__c).split('T')[0];
+            if (cardDate !== dateKey) return;
+            if (excludeCard) {
+                if (excludeCard.Id && card.Id === excludeCard.Id) return;
+                if (excludeCard.key && card.key === excludeCard.key) return;
+            }
+            const endMin = this.timeToMinutes(card.End_Time__c);
+            if (endMin !== null && endMin > nextStart) {
+                nextStart = endMin;
+            }
+        });
+        return nextStart;
+    }
+
+    convertHoursToTimes(hours, dateStr, excludeCard) {
+        const durationMinutes = Math.round(parseFloat(hours) * 60);
+        if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+            const startMinutes = this.getNextStartMinutesForDate(dateStr, excludeCard);
+            return {
+                startTime: this.minutesToTimeString(startMinutes),
+                endTime: this.minutesToTimeString(startMinutes)
+            };
+        }
+
+        // First task of the day starts at 08:00; each next task starts where the previous ended
+        const startMinutes = this.getNextStartMinutesForDate(dateStr, excludeCard);
+        const endMinutes = startMinutes + durationMinutes;
+
+        return {
+            startTime: this.minutesToTimeString(startMinutes),
+            endTime: this.minutesToTimeString(endMinutes)
+        };
+    }
+
+    hasOverlappingTimes(candidate, excludeCard) {
+        const dateKey = candidate?.Date_of_Service__c
+            ? String(candidate.Date_of_Service__c).split('T')[0]
+            : null;
+        const start = this.timeToMinutes(candidate?.Start_Time__c);
+        const end = this.timeToMinutes(candidate?.End_Time__c);
+        if (!dateKey || start === null || end === null) return false;
+
+        return (this.myList || []).some((card) => {
+            if (!card.Date_of_Service__c) return false;
+            if (String(card.Date_of_Service__c).split('T')[0] !== dateKey) return false;
+            if (excludeCard) {
+                if (excludeCard.Id && card.Id === excludeCard.Id) return false;
+                if (excludeCard.key && card.key === excludeCard.key) return false;
+            }
+            const otherStart = this.timeToMinutes(card.Start_Time__c);
+            const otherEnd = this.timeToMinutes(card.End_Time__c);
+            if (otherStart === null || otherEnd === null) return false;
+            // Touching boundaries OK; overlapping ranges not
+            return start < otherEnd && otherStart < end;
+        });
     }
 
     handleAddNewCard() {
@@ -282,15 +353,45 @@ export default class Timer extends LightningElement {
             return;
         }
 
-        // Convert hours to start/end times
+        const isEditing = this.newCard.isEditing;
+        const excludeCard = isEditing
+            ? { Id: this.newCard.Id, key: this.newCard.key }
+            : null;
+
+        // Convert hours to start/end times (sequential from 08:00 for new cards;
+        // edits keep existing start and only adjust end by hours)
         if (this.newCard.Hours__c) {
-            const times = this.convertHoursToTimes(parseFloat(this.newCard.Hours__c));
-            this.newCard.Start_Time__c = times.startTime;
-            this.newCard.End_Time__c = times.endTime;
+            const hours = parseFloat(this.newCard.Hours__c);
+            if (isEditing && this.newCard.Start_Time__c) {
+                const startMinutes = this.timeToMinutes(this.newCard.Start_Time__c);
+                const durationMinutes = Math.round(hours * 60);
+                if (startMinutes !== null && Number.isFinite(durationMinutes) && durationMinutes > 0) {
+                    this.newCard.Start_Time__c = this.minutesToTimeString(startMinutes);
+                    this.newCard.End_Time__c = this.minutesToTimeString(startMinutes + durationMinutes);
+                }
+            } else {
+                const times = this.convertHoursToTimes(
+                    hours,
+                    this.newCard.Date_of_Service__c,
+                    excludeCard
+                );
+                this.newCard.Start_Time__c = times.startTime;
+                this.newCard.End_Time__c = times.endTime;
+            }
+        }
+
+        if (this.hasOverlappingTimes(this.newCard, excludeCard)) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error',
+                    message: 'Time ranges cannot overlap on the same day. Tasks must be sequential (e.g. 08:00–10:00, then 10:00–11:00).',
+                    variant: 'error',
+                })
+            );
+            return;
         }
 
         this.isSpinner = true;
-        const isEditing = this.newCard.isEditing;
 
         // Check if editing existing card or adding new one
         if (isEditing) {
@@ -376,13 +477,14 @@ export default class Timer extends LightningElement {
         const dateStr = event.currentTarget.dataset.date;
         if (dateStr) {
             this.selectedDate = dateStr;
+            const nextStart = this.getNextStartMinutesForDate(dateStr);
             this.newCard = {
                 Production__c: '',
                 TaskRay_Task__c: '',
                 Service__c: '',
                 Date_of_Service__c: dateStr,
-                Start_Time__c: '08:00:00.000',
-                End_Time__c: '17:00:00.000',
+                Start_Time__c: this.minutesToTimeString(nextStart),
+                End_Time__c: this.minutesToTimeString(nextStart + 60),
                 Service_Notes__c: '',
                 key: (Math.random().toString(36).substring(2, 15))
             };
@@ -401,9 +503,12 @@ export default class Timer extends LightningElement {
         );
         
         if (cardToEdit) {
-            // Calculate hours from start/end times for display
-            const hours = cardToEdit.Start_Time__c && cardToEdit.End_Time__c ? 
-                this.calculateHours(cardToEdit.Start_Time__c, cardToEdit.End_Time__c) : '';
+            // Calculate hours from start/end times for display (0 is a valid midnight ms value)
+            const hasStart = cardToEdit.Start_Time__c !== null && cardToEdit.Start_Time__c !== undefined && cardToEdit.Start_Time__c !== '';
+            const hasEnd = cardToEdit.End_Time__c !== null && cardToEdit.End_Time__c !== undefined && cardToEdit.End_Time__c !== '';
+            const hours = hasStart && hasEnd
+                ? this.calculateHours(cardToEdit.Start_Time__c, cardToEdit.End_Time__c)
+                : '';
             
             // Open modal with card data for editing
             this.newCard = {
@@ -1190,13 +1295,17 @@ export default class Timer extends LightningElement {
     }
 
     formatTimeForDisplay(timeStr) {
-        if (!timeStr) return '';
-        // Extract HH:MM from time string
-        const parts = timeStr.split(':');
+        // 0 is a valid Apex Time (12:00 AM) — do not treat as empty
+        if (timeStr === null || timeStr === undefined || timeStr === '') return '';
+        const normalized = typeof timeStr === 'number' || (typeof timeStr === 'string' && timeStr.indexOf(':') === -1)
+            ? this.convertTime(timeStr, '')
+            : timeStr;
+        if (!normalized) return '';
+        const parts = String(normalized).split(':');
         if (parts.length >= 2) {
             return `${parts[0]}:${parts[1]}`;
         }
-        return timeStr;
+        return String(normalized);
     }
 
     get modalTitle() {
@@ -1208,14 +1317,21 @@ export default class Timer extends LightningElement {
     }
 
     calculateHours(startTime, endTime) {
-        if (!startTime || !endTime) return '0';
+        // 0 is valid (midnight ms); only skip null/undefined/''
+        if (startTime === null || startTime === undefined || startTime === '' ||
+            endTime === null || endTime === undefined || endTime === '') {
+            return '0';
+        }
         
         try {
-            // Parse time strings (format: HH:MM:SS.mmm)
+            // Parse time strings (format: HH:MM:SS.mmm) or Apex ms
             const parseTime = (timeStr) => {
-                const parts = timeStr.split(':');
-                const hours = parseInt(parts[0]) || 0;
-                const minutes = parseInt(parts[1]) || 0;
+                if (typeof timeStr === 'number') {
+                    return timeStr / 3600000;
+                }
+                const parts = String(timeStr).split(':');
+                const hours = parseInt(parts[0], 10) || 0;
+                const minutes = parseInt(parts[1], 10) || 0;
                 return hours + (minutes / 60);
             };
             
@@ -1274,15 +1390,8 @@ export default class Timer extends LightningElement {
                         this.record[i].recordUrl = `/${this.record[i].Id}`;
                     }
                
-                    if(this.record[i].Start_Time__c) {
-                        this.record[i].Start_Time__c = this.convertTime(this.record[i].Start_Time__c);
-                    } else {
-                        this.record[i].Start_Time__c = '00:00:00.000';
-                    }
-                         
-                    if(this.record[i].End_Time__c) {
-                        this.record[i].End_Time__c = this.convertTime(this.record[i].End_Time__c);
-                    }
+                    this.record[i].Start_Time__c = this.convertTime(this.record[i].Start_Time__c, '08:00:00.000');
+                    this.record[i].End_Time__c = this.convertTime(this.record[i].End_Time__c, null);
 
                     this.record[i].key = (Math.random().toString(36).substring(2, 15));
                     this.totalOfPer += +this.record[i].Ticket_Time__c;
@@ -1400,8 +1509,8 @@ export default class Timer extends LightningElement {
             const timeCards = (this.myList || []).map((c) => ({
                 id: c.Id || null,
                 date: c?.Date_of_Service__c ? String(c.Date_of_Service__c).split('T')[0] : null,
-                startTime: c.Start_Time__c || null,
-                endTime: c.End_Time__c || null,
+                startTime: (c.Start_Time__c !== null && c.Start_Time__c !== undefined && c.Start_Time__c !== '') ? c.Start_Time__c : null,
+                endTime: (c.End_Time__c !== null && c.End_Time__c !== undefined && c.End_Time__c !== '') ? c.End_Time__c : null,
                 hours: parseFloat(this.calculateHours(c.Start_Time__c, c.End_Time__c) || 0),
                 production: c.ProductionName || null,
                 service: c.ServiceName || null,
@@ -1601,26 +1710,36 @@ export default class Timer extends LightningElement {
         }
     }
 
-    convertTime(seconds) {
-        console.log('seconds ', seconds);
-        if (seconds === 0) {
-            return '08:00:00.000'; 
+    /**
+     * Apex Time arrives as ms since midnight. Midnight is 0 (falsy) and must not be
+     * treated as "empty" — that made lightning-formatted-time / display show "-".
+     * Empty/midnight defaults to work-day start (08:00) when emptyAs is set.
+     */
+    convertTime(value, emptyAs = '08:00:00.000') {
+        if (value === null || value === undefined || value === '') {
+            return emptyAs;
+        }
+        // Already a Salesforce time string
+        if (typeof value === 'string' && value.indexOf(':') !== -1) {
+            return value;
+        }
+        const ms = Number(value);
+        if (!Number.isFinite(ms)) {
+            return emptyAs;
+        }
+        // 0 = 12:00 AM from Apex → work day starts at 08:00
+        if (ms === 0) {
+            return '08:00:00.000';
         }
 
-        let date = new Date(seconds);
+        const date = new Date(ms);
         let hh = date.getUTCHours();
         let mm = date.getUTCMinutes();
-        let ss = date.getSeconds();
-        // If you were building a timestamp instead of a duration, you would uncomment the following line to get 12-hour (not 24) time
-        // if (hh > 12) {hh = hh % 12;}
-        // These lines ensure you have two-digits
-        if (hh < 10) {hh = "0"+hh;}
-        if (mm < 10) {mm = "0"+mm;}
-        if (ss < 10) {ss = "0"+ss;}
-
-        console.log(seconds);
-        // This formats your string to HH:MM:SS
-        return hh+':'+mm+':'+ss+'.000'; 
+        let ss = date.getUTCSeconds();
+        if (hh < 10) { hh = '0' + hh; }
+        if (mm < 10) { mm = '0' + mm; }
+        if (ss < 10) { ss = '0' + ss; }
+        return hh + ':' + mm + ':' + ss + '.000';
     }
     onDoubleClickEdit() {
         this.isEdited = true;
